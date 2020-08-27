@@ -60,7 +60,7 @@ COLORS = {
   'done'    => :blue,
   'started' => :green,
   'blocked' => :yellow,
-  'default' => :red
+  'default' => :magenta
 }
 
 TODO_FILE = "#{ENV["HOME"]}/todo.jsonl"
@@ -172,12 +172,13 @@ end
 
 def list(tasks_map = nil, patterns = nil)
   items = {}
-  tasks = tasks_map.nil? ? get_tasks : tasks_map
-  patterns = ["\"state\":\"(new|started|blocked)\""] if patterns.nil? || patterns.empty?
+  tasks = tasks_map || get_tasks
+  search_patterns = patterns.nil? || patterns.empty? ? ["state=(new|started|blocked)"] : patterns
   tasks.each do |num, task|
+    normalized_task = "state=#{task['state']} #{task['title']}"
     match = true
-    patterns.each do |pattern|
-      match = false unless /#{pattern}/ix.match(JSON.generate(task))
+    search_patterns.each do |pattern|
+      match = false unless /#{pattern}/ix.match(normalized_task)
     end
     items[num] = task if match
   end
