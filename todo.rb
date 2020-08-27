@@ -28,6 +28,17 @@ require 'json'
 
 DATE_FORMAT = '%Y-%m-%d'
 
+COLOR_CODES = {
+  black:   30,
+  red:     31,
+  green:   32,
+  yellow:  33,
+  blue:    34,
+  magenta: 35,
+  cyan:    36,
+  white:   37
+}
+
 STATES = {
   'new'  => '[ ]',
   'done' => '[x]',
@@ -45,11 +56,11 @@ PRIO = {
 }
 
 COLORS = {
-  'new'     => 37,
-  'done'    => 34,
-  'started' => 32,
-  'blocked' => 33,
-  'default' => 31
+  'new'     => :white,
+  'done'    => :blue,
+  'started' => :green,
+  'blocked' => :yellow,
+  'default' => :red
 }
 
 TODO_FILE = "#{ENV["HOME"]}/todo.jsonl"
@@ -115,6 +126,7 @@ def append(item, text = '')
   tasks = get_tasks
   check_item(tasks, item)
   tasks[item]['title'] = [tasks[item]['title'], text].join(' ')
+  tasks[item]['modified'] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
   list(tasks)
 end
@@ -166,8 +178,8 @@ def list(tasks_map = nil, patterns = nil)
   items.each do |num, task|
     state = task['state'] || 'default'
     color = COLORS[state]
-    display_state = "\e[#{color}m#{STATES[state]}\e[0m" 
-    title = task['title'].gsub(/#\w+/) { |tag| "\e[36m" + tag + "\e[0m" }
+    display_state = colorize(STATES[state], color)
+    title = task['title'].gsub(/@\w+/) { |tag| colorize(tag, :cyan) }
     puts "#{num.to_s.rjust(4, ' ')}: #{display_state} #{title}"
   end
 end
@@ -175,10 +187,11 @@ end
 def add_note(item, text)
   tasks = get_tasks
   check_item(tasks, item)
-  tasks[item]['note'] = [] if tasks[item]['note'].nil?
+  tasks[item]['note'] ||= []
   tasks[item]['note'].push(text)
+  tasks[item]['modified'] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
-  list(tasks)
+  show(item)
 end
 
 def show(item)
@@ -186,15 +199,19 @@ def show(item)
   check_item(tasks, item)
   tasks[item].each do |key, value|
     val = value.kind_of?(Array) ? "\n" + value.join("\n") : value
-    puts "#{key.to_s.rjust(10, ' ')}: #{val}"
+    puts "#{colorize(key.to_s.rjust(10, ' '), :cyan)}: #{val}"
   end
 end
 
 def check_item(tasks, item)
   unless tasks.has_key?(item)
-    puts "\e[31mERROR:\e[0m #{item}: No such todo"
+    puts "#{colorize('ERROR:', :red)} #{item}: No such todo"
     exit
   end
+end
+
+def colorize(text, color)
+  "\e[#{COLOR_CODES[color]}m#{text}\e[0m"
 end
 
 def read(arguments)
@@ -224,7 +241,6 @@ def read(arguments)
     show(args.first.to_i) if args.length == 1
   when 'help'
     puts usage
-    exit
   else
     list(nil, arguments)
   end
