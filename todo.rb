@@ -173,7 +173,7 @@ end
 def list(tasks_map = nil, patterns = nil)
   items = {}
   tasks = tasks_map || get_tasks
-  search_patterns = patterns.nil? || patterns.empty? ? ["state=(new|started|blocked)"] : patterns
+  search_patterns = patterns.nil? || patterns.empty? ? ['state=(new|started|blocked)'] : patterns
   tasks.each do |num, task|
     normalized_task = "state=#{task['state']} #{task['title']}"
     match = true
@@ -231,13 +231,13 @@ def read(arguments)
 
   case action
   when 'add'
-    add(args.join(' ')) unless args.nil?
+    add(args.join(' ')) unless args.nil? || args.empty?
   when 'start'
-    change_state(args.first.to_i, 'started') if args.length == 1
+    args.length == 1 ? change_state(args.first.to_i, 'started') : list(nil, ['state=started'])
   when 'done'
-    change_state(args.first.to_i, 'done') if args.length == 1
+    args.length == 1 ? change_state(args.first.to_i, 'done') : list(nil, ['state=done'])
   when 'block'
-    change_state(args.first.to_i, 'blocked') if args.length == 1
+    args.length == 1 ? change_state(args.first.to_i, 'blocked') : list(nil, ['state=blocked'])
   when 'prio'
     set_priority(args.first.to_i) if args.length == 1
   when 'append'
