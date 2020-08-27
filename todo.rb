@@ -74,6 +74,7 @@ def usage
     * start <tasknumber>             mark task as started
     * done <tasknumber>              mark task as completed
     * block <tasknumber>             mark task as blocked
+    * prio <tasknumber>              toggle high priority flag
 
     * append <tasknumber> <text>     append text to task title
     * replace <tasknumber> <text>    replace task
@@ -160,6 +161,15 @@ def change_state(item, state)
   list(tasks)
 end
 
+def set_priority(item)
+  tasks = get_tasks
+  check_item(tasks, item)
+  tasks[item]['priority'] = !tasks[item]['priority']
+  tasks[item]['modified'] = Time.now.strftime(DATE_FORMAT)
+  write_tasks(tasks)
+  list(tasks)
+end
+
 def list(tasks_map = nil, patterns = nil)
   items = {}
   tasks = tasks_map.nil? ? get_tasks : tasks_map
@@ -173,14 +183,14 @@ def list(tasks_map = nil, patterns = nil)
   end
   items = items.sort_by do |num, task|
     prio = PRIO[task['state'] || 'default']
-    [prio.to_s, num]
+    [task['priority'] ? 0 : 1, prio.to_s, num]
   end
   items.each do |num, task|
     state = task['state'] || 'default'
     color = COLORS[state]
     display_state = colorize(STATES[state], color)
     title = task['title'].gsub(/@\w+/) { |tag| colorize(tag, :cyan) }
-    puts "#{num.to_s.rjust(4, ' ')}: #{display_state} #{title}"
+    puts "#{colorize(task['priority'] ? '*' : ' ', :red)}#{num.to_s.rjust(4, ' ')}: #{display_state} #{title}"
   end
 end
 
@@ -227,6 +237,8 @@ def read(arguments)
     change_state(args.first.to_i, 'done') if args.length == 1
   when 'block'
     change_state(args.first.to_i, 'blocked') if args.length == 1
+  when 'prio'
+    set_priority(args.first.to_i) if args.length == 1
   when 'append'
     append(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
   when 'replace'
