@@ -87,7 +87,7 @@ def usage
    USAGE
 end
 
-def get_tasks
+def get_tasks(item_to_check = nil)
   count = 0
   tasks = {}
   if File.exist?(TODO_FILE)
@@ -99,33 +99,35 @@ def get_tasks
       end
     end
   end
+  if item_to_check && !tasks.has_key?(item_to_check)
+    puts "#{colorize('ERROR:', :red)} #{item_to_check}: No such todo"
+    exit
+  end
   tasks
 end
 
 def write_tasks(tasks)
-  keys = tasks.keys.sort
-  file = File.open(TODO_FILE, 'w:UTF-8')
-  keys.each do |key|
-    file.write(JSON.generate(tasks[key]) + "\n")
+  File.open(TODO_FILE, 'w:UTF-8') do |file|
+    tasks.keys.sort.each do |key|
+      file.write(JSON.generate(tasks[key]) + "\n")
+    end
   end
-  file.close
 end
 
 def add(text)
-  file = File.open(TODO_FILE, 'a:UTF-8')
   task = {
     'state' => 'new',
     'title' => text,
     'modified' => Time.now.strftime(DATE_FORMAT)
   }
-  file.write(JSON.generate(task) + "\n")
-  file.close
+  File.open(TODO_FILE, 'a:UTF-8') do |file|
+    file.write(JSON.generate(task) + "\n")
+  end
   list
 end
 
 def append(item, text = '')
-  tasks = get_tasks
-  check_item(tasks, item)
+  tasks = get_tasks(item)
   tasks[item]['title'] = [tasks[item]['title'], text].join(' ')
   tasks[item]['modified'] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
@@ -133,8 +135,7 @@ def append(item, text = '')
 end
 
 def replace(item, text)
-  tasks = get_tasks
-  check_item(tasks, item)
+  tasks = get_tasks(item)
   tasks[item] = {
     'state' => 'new',
     'title' => text,
@@ -145,16 +146,14 @@ def replace(item, text)
 end
 
 def delete(item)
-  tasks = get_tasks
-  check_item(tasks, item)
+  tasks = get_tasks(item)
   tasks.delete(item)
   write_tasks(tasks)
   list
 end
 
 def change_state(item, state)
-  tasks = get_tasks
-  check_item(tasks, item)
+  tasks = get_tasks(item)
   tasks[item]['state'] = state
   tasks[item]['modified'] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
@@ -162,8 +161,7 @@ def change_state(item, state)
 end
 
 def set_priority(item)
-  tasks = get_tasks
-  check_item(tasks, item)
+  tasks = get_tasks(item)
   tasks[item]['priority'] = !tasks[item]['priority']
   tasks[item]['modified'] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
@@ -183,8 +181,7 @@ def list(tasks_map = nil, patterns = nil)
     items[num] = task if match
   end
   items = items.sort_by do |num, task|
-    prio = PRIO[task['state'] || 'default']
-    [task['priority'] ? 0 : 1, prio.to_s, num]
+    [task['priority'] ? 0 : 1, PRIO[task['state'] || 'default'], num]
   end
   items.each do |num, task|
     state = task['state'] || 'default'
@@ -196,8 +193,7 @@ def list(tasks_map = nil, patterns = nil)
 end
 
 def add_note(item, text)
-  tasks = get_tasks
-  check_item(tasks, item)
+  tasks = get_tasks(item)
   tasks[item]['note'] ||= []
   tasks[item]['note'].push(text)
   tasks[item]['modified'] = Time.now.strftime(DATE_FORMAT)
@@ -206,18 +202,10 @@ def add_note(item, text)
 end
 
 def show(item)
-  tasks = get_tasks
-  check_item(tasks, item)
+  tasks = get_tasks(item)
   tasks[item].each do |key, value|
     val = value.kind_of?(Array) ? "\n" + value.join("\n") : value
     puts "#{colorize(key.to_s.rjust(10, ' '), :cyan)}: #{val}"
-  end
-end
-
-def check_item(tasks, item)
-  unless tasks.has_key?(item)
-    puts "#{colorize('ERROR:', :red)} #{item}: No such todo"
-    exit
   end
 end
 
@@ -228,7 +216,6 @@ end
 def read(arguments)
   action = arguments.first
   args = arguments[1..-1]
-
   case action
   when 'add'
     add(args.join(' ')) unless args.nil? || args.empty?
