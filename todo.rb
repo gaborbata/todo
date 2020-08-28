@@ -63,6 +63,14 @@ COLORS = {
   'default' => :magenta
 }
 
+QUERIES = {
+  ':active'  => 'state=(new|started|blocked)',
+  ':done'    => 'state=done',
+  ':blocked' => 'state=blocked',
+  ':started' => 'state=started',
+  ':new'     => 'state=new'
+}
+
 TODO_FILE = "#{ENV["HOME"]}/todo.jsonl"
 
 def usage
@@ -169,12 +177,12 @@ end
 def list(tasks_map = nil, patterns = nil)
   items = {}
   tasks = tasks_map || get_tasks
-  search_patterns = patterns.nil? || patterns.empty? ? ['state=(new|started|blocked)'] : patterns
+  search_patterns = patterns.nil? || patterns.empty? ? [QUERIES[':active']] : patterns
   tasks.each do |num, task|
     normalized_task = "state=#{task['state']} #{task['title']}"
     match = true
     search_patterns.each do |pattern|
-      match = false unless /#{pattern}/ix.match(normalized_task)
+      match = false unless /#{QUERIES[pattern] || pattern}/ix.match(normalized_task)
     end
     items[num] = task if match
   end
@@ -227,11 +235,11 @@ def read(arguments)
   when 'add'
     add(args.join(' ')) unless args.nil? || args.empty?
   when 'start'
-    args.length == 1 ? change_state(args.first.to_i, 'started') : list(nil, ['state=started'])
+    args.length == 1 ? change_state(args.first.to_i, 'started') : list(nil, [':started'])
   when 'done'
-    args.length == 1 ? change_state(args.first.to_i, 'done') : list(nil, ['state=done'])
+    args.length == 1 ? change_state(args.first.to_i, 'done') : list(nil, [':done'])
   when 'block'
-    args.length == 1 ? change_state(args.first.to_i, 'blocked') : list(nil, ['state=blocked'])
+    args.length == 1 ? change_state(args.first.to_i, 'blocked') : list(nil, [':blocked'])
   when 'prio'
     set_priority(args.first.to_i) if args.length == 1
   when 'append'
