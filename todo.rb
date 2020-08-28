@@ -40,8 +40,8 @@ COLOR_CODES = {
 }
 
 STATES = {
-  'new'  => '[ ]',
-  'done' => '[x]',
+  'new'     => '[ ]',
+  'done'    => '[x]',
   'started' => '[>]',
   'blocked' => '[!]',
   'default' => '[?]'
@@ -90,7 +90,7 @@ def usage
     * note <tasknumber> <text>       add note to task
     * delnote <tasknumber> <text>    delete all notes from task
 
-    * list <regexp>                  list tasks (only not completed by default)
+    * list <regexp> [regexp...]      list tasks (only active tasks by default)
     * show <tasknumber>              show all task details
     * help                           this help screen
    USAGE
