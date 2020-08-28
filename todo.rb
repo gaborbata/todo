@@ -188,7 +188,8 @@ def list(tasks_map = nil, patterns = nil)
     color = COLORS[state]
     display_state = colorize(STATES[state], color)
     title = task['title'].gsub(/@\w+/) { |tag| colorize(tag, :cyan) }
-    puts "#{colorize(task['priority'] ? '*' : ' ', :red)}#{num.to_s.rjust(4, ' ')}: #{display_state} #{title}"
+    priority_flag = task['priority'] ? colorize('*', :red) : ' '
+    puts "#{num.to_s.rjust(4, ' ')}:#{priority_flag}#{display_state} #{title}"
   end
 end
 
