@@ -10,11 +10,13 @@ Commands:
 * start <tasknumber>             mark task as started
 * done <tasknumber>              mark task as completed
 * block <tasknumber>             mark task as blocked
+* prio <tasknumber>              toggle high priority flag
 
 * append <tasknumber> <text>     append text to task title
-* replace <tasknumber> <text>    replace task
+* rename <tasknumber> <text>     rename task
 * del <tasknumber>               delete task
 * note <tasknumber> <text>       add note to task
+* delnote <tasknumber> <text>    delete all notes from task
 
 * list <regexp>                  list tasks (only not completed by default)
 * show <tasknumber>              show all task details
@@ -27,4 +29,4 @@ Commands:
 
 ## Requirements
 
-Ruby 2.6 or newer
+Ruby 2.5 or newer

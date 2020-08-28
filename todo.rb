@@ -77,9 +77,10 @@ def usage
     * prio <tasknumber>              toggle high priority flag
 
     * append <tasknumber> <text>     append text to task title
-    * replace <tasknumber> <text>    replace task
+    * rename <tasknumber> <text>     rename task
     * del <tasknumber>               delete task
     * note <tasknumber> <text>       add note to task
+    * delnote <tasknumber> <text>    delete all notes from task
 
     * list <regexp>                  list tasks (only not completed by default)
     * show <tasknumber>              show all task details
@@ -134,13 +135,10 @@ def append(item, text = '')
   list(tasks)
 end
 
-def replace(item, text)
+def rename(item, text)
   tasks = get_tasks(item)
-  tasks[item] = {
-    'state' => 'new',
-    'title' => text,
-    'modified' => Time.now.strftime(DATE_FORMAT)
-  }
+  tasks[item]['title'] = text
+  tasks[item]['modified'] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
   list(tasks)
 end
@@ -202,6 +200,14 @@ def add_note(item, text)
   show(item)
 end
 
+def delete_note(item)
+  tasks = get_tasks(item)
+  tasks[item]['note'] = []
+  tasks[item]['modified'] = Time.now.strftime(DATE_FORMAT)
+  write_tasks(tasks)
+  show(item)
+end
+
 def show(item)
   tasks = get_tasks(item)
   tasks[item].each do |key, value|
@@ -230,12 +236,14 @@ def read(arguments)
     set_priority(args.first.to_i) if args.length == 1
   when 'append'
     append(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
-  when 'replace'
-    replace(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
+  when 'rename'
+    rename(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
   when 'del'
     delete(args.first.to_i) if args.length == 1
   when 'note'
     add_note(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
+  when 'delnote'
+    delete_note(args.first.to_i) if args.length == 1
   when 'list'
     list(nil, args)
   when 'show'
