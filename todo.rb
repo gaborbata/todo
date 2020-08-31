@@ -72,6 +72,8 @@ QUERIES = {
   ':all'     => 'state=\w+'
 }
 
+PRIORITY_FLAG = '*'
+
 TODO_FILE = "#{ENV["HOME"]}/todo.jsonl"
 
 def usage
@@ -96,7 +98,10 @@ def usage
     * help                           this help screen
 
     With list command the following pre-defined regex patterns can be also used:
-    :active, :done, :blocked, :started, :new, :all
+    #{QUERIES.keys.join(', ')}
+
+    Legend:
+    #{STATES.select { |k, v| k != 'default' }.map { |k, v| "#{k} #{v}" }.join(', ') }, priority #{PRIORITY_FLAG}
    USAGE
 end
 
@@ -198,7 +203,7 @@ def list(tasks_map = nil, patterns = nil)
     color = COLORS[state]
     display_state = colorize(STATES[state], color)
     title = task['title'].gsub(/@\w+/) { |tag| colorize(tag, :cyan) }
-    priority_flag = task['priority'] ? colorize('*', :red) : ' '
+    priority_flag = task['priority'] ? colorize(PRIORITY_FLAG, :red) : ' '
     puts "#{num.to_s.rjust(4, ' ')}:#{priority_flag}#{display_state} #{title}"
   end
 end

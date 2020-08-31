@@ -24,6 +24,9 @@ Commands:
 
 With list command the following pre-defined regex patterns can be also used:
 :active, :done, :blocked, :started, :new, :all
+
+Legend:
+new [ ], done [x], started [>], blocked [!], priority *
 ```
 
 ## Demo
