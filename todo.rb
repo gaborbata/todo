@@ -93,6 +93,9 @@ def usage
     * list <regexp> [regexp...]      list tasks (only active tasks by default)
     * show <tasknumber>              show all task details
     * help                           this help screen
+
+    With list command the following pre-defined patterns can be also used:
+    :active, :done, :blocked, :started, :new
    USAGE
 end
 
