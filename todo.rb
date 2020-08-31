@@ -113,7 +113,7 @@ def get_tasks(item_to_check = nil)
       file.each_line do |line|
         next if line.strip == ''
         count += 1
-        tasks[count] = JSON.parse(line.chomp)
+        tasks[count] = JSON.parse(line.chomp, :symbolize_names => true)
       end
     end
   end
@@ -134,9 +134,9 @@ end
 
 def add(text)
   task = {
-    'state' => 'new',
-    'title' => text,
-    'modified' => Time.now.strftime(DATE_FORMAT)
+    state: 'new',
+    title: text,
+    modified: Time.now.strftime(DATE_FORMAT)
   }
   File.open(TODO_FILE, 'a:UTF-8') do |file|
     file.write(JSON.generate(task) + "\n")
@@ -146,16 +146,16 @@ end
 
 def append(item, text = '')
   tasks = get_tasks(item)
-  tasks[item]['title'] = [tasks[item]['title'], text].join(' ')
-  tasks[item]['modified'] = Time.now.strftime(DATE_FORMAT)
+  tasks[item][:title] = [tasks[item][:title], text].join(' ')
+  tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
   list(tasks)
 end
 
 def rename(item, text)
   tasks = get_tasks(item)
-  tasks[item]['title'] = text
-  tasks[item]['modified'] = Time.now.strftime(DATE_FORMAT)
+  tasks[item][:title] = text
+  tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
   list(tasks)
 end
@@ -169,16 +169,16 @@ end
 
 def change_state(item, state)
   tasks = get_tasks(item)
-  tasks[item]['state'] = state
-  tasks[item]['modified'] = Time.now.strftime(DATE_FORMAT)
+  tasks[item][:state] = state
+  tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
   list(tasks)
 end
 
 def set_priority(item)
   tasks = get_tasks(item)
-  tasks[item]['priority'] = !tasks[item]['priority']
-  tasks[item]['modified'] = Time.now.strftime(DATE_FORMAT)
+  tasks[item][:priority] = !tasks[item][:priority]
+  tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
   list(tasks)
 end
@@ -188,7 +188,7 @@ def list(tasks_map = nil, patterns = nil)
   tasks = tasks_map || get_tasks
   search_patterns = patterns.nil? || patterns.empty? ? [QUERIES[':active']] : patterns
   tasks.each do |num, task|
-    normalized_task = "state=#{task['state']} #{task['title']}"
+    normalized_task = "state=#{task[:state]} #{task[:title]}"
     match = true
     search_patterns.each do |pattern|
       match = false unless /#{QUERIES[pattern] || pattern}/ix.match(normalized_task)
@@ -196,31 +196,31 @@ def list(tasks_map = nil, patterns = nil)
     items[num] = task if match
   end
   items = items.sort_by do |num, task|
-    [task['priority'] ? 0 : 1, PRIO[task['state'] || 'default'], num]
+    [task[:priority] ? 0 : 1, PRIO[task[:state] || 'default'], num]
   end
   items.each do |num, task|
-    state = task['state'] || 'default'
+    state = task[:state] || 'default'
     color = COLORS[state]
     display_state = colorize(STATES[state], color)
-    title = task['title'].gsub(/@\w+/) { |tag| colorize(tag, :cyan) }
-    priority_flag = task['priority'] ? colorize(PRIORITY_FLAG, :red) : ' '
+    title = task[:title].gsub(/@\w+/) { |tag| colorize(tag, :cyan) }
+    priority_flag = task[:priority] ? colorize(PRIORITY_FLAG, :red) : ' '
     puts "#{num.to_s.rjust(4, ' ')}:#{priority_flag}#{display_state} #{title}"
   end
 end
 
 def add_note(item, text)
   tasks = get_tasks(item)
-  tasks[item]['note'] ||= []
-  tasks[item]['note'].push(text)
-  tasks[item]['modified'] = Time.now.strftime(DATE_FORMAT)
+  tasks[item][:note] ||= []
+  tasks[item][:note].push(text)
+  tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
   show(item)
 end
 
 def delete_note(item)
   tasks = get_tasks(item)
-  tasks[item]['note'] = []
-  tasks[item]['modified'] = Time.now.strftime(DATE_FORMAT)
+  tasks[item][:note] = []
+  tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
   show(item)
 end
