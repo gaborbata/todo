@@ -271,6 +271,7 @@ def read(arguments)
   when 'repl'
     command = ''
     while !['exit', 'quit'].include?(command)
+      print "\e[H\e[2J" if ['clear', 'cls'].include?(command)
       read(command == 'repl' ? [] : command.split(/\s+/))
       print "\ntodo> "
       command = STDIN.gets.chomp
