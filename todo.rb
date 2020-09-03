@@ -95,6 +95,7 @@ def usage
 
     * list <regex> [regex...]        list tasks (only active tasks by default)
     * show <tasknumber>              show all task details
+    * repl                           enter read–eval–print loop mode
     * help                           this help screen
 
     With list command the following pre-defined regex patterns can be also used:
@@ -267,6 +268,13 @@ def read(arguments)
     show(args.first.to_i) if args.length == 1
   when 'help'
     puts usage
+  when 'repl'
+    command = ''
+    while !['exit', 'quit'].include?(command)
+      read(command == 'repl' ? [] : command.split(/\s+/))
+      print "\ntodo> "
+      command = STDIN.gets.chomp
+    end
   else
     list(nil, arguments)
   end
