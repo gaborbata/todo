@@ -207,6 +207,7 @@ def list(tasks_map = nil, patterns = nil)
     priority_flag = task[:priority] ? colorize(PRIORITY_FLAG, :red) : ' '
     puts "#{num.to_s.rjust(4, ' ')}:#{priority_flag}#{display_state} #{title}"
   end
+  puts 'No todos found' if items.empty?
 end
 
 def add_note(item, text)
