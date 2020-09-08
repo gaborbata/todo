@@ -74,7 +74,7 @@ QUERIES = {
 
 PRIORITY_FLAG = '*'
 
-TODO_FILE = "#{ENV["HOME"]}/todo.jsonl"
+TODO_FILE = "#{ENV['HOME']}/todo.jsonl"
 
 def usage
   <<~USAGE
@@ -235,6 +235,19 @@ def show(item)
   end
 end
 
+def start_repl()
+  command = ''
+  while !['exit', 'quit'].include?(command)
+    if ['clear', 'cls'].include?(command)
+      print "\e[H\e[2J"
+    else
+      read(command == 'repl' ? [] : command.split(/\s+/))
+    end
+    print "\ntodo> "
+    command = STDIN.gets.chomp
+  end
+end
+
 def colorize(text, color)
   "\e[#{COLOR_CODES[color]}m#{text}\e[0m"
 end
@@ -270,16 +283,7 @@ def read(arguments)
   when 'help'
     puts usage
   when 'repl'
-    command = ''
-    while !['exit', 'quit'].include?(command)
-      if ['clear', 'cls'].include?(command)
-        print "\e[H\e[2J"
-      else
-        read(command == 'repl' ? [] : command.split(/\s+/))
-      end
-      print "\ntodo> "
-      command = STDIN.gets.chomp
-    end
+    start_repl
   else
     list(nil, arguments)
   end
