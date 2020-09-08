@@ -231,7 +231,7 @@ def show(item)
   tasks = get_tasks(item)
   tasks[item].each do |key, value|
     val = value.kind_of?(Array) ? "\n" + value.join("\n") : value
-    puts "#{colorize(key.to_s.rjust(10, ' '), :cyan)}: #{val}"
+    puts "#{colorize(key.to_s.rjust(10, ' ') + ':', :cyan)} #{val}"
   end
 end
 
