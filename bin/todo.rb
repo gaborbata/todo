@@ -119,8 +119,7 @@ def get_tasks(item_to_check = nil)
     end
   end
   if item_to_check && !tasks.has_key?(item_to_check)
-    puts "#{colorize('ERROR:', :red)} #{item_to_check}: No such todo"
-    exit
+    raise "#{item_to_check}: No such todo"
   end
   tasks
 end
@@ -253,39 +252,43 @@ def colorize(text, color)
 end
 
 def read(arguments)
-  action = arguments.first
-  args = arguments[1..-1]
-  case action
-  when 'add'
-    add(args.join(' ')) unless args.nil? || args.empty?
-  when 'start'
-    args.length == 1 ? change_state(args.first.to_i, 'started') : list(nil, [':started'])
-  when 'done'
-    args.length == 1 ? change_state(args.first.to_i, 'done') : list(nil, [':done'])
-  when 'block'
-    args.length == 1 ? change_state(args.first.to_i, 'blocked') : list(nil, [':blocked'])
-  when 'prio'
-    set_priority(args.first.to_i) if args.length == 1
-  when 'append'
-    append(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
-  when 'rename'
-    rename(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
-  when 'del'
-    delete(args.first.to_i) if args.length == 1
-  when 'note'
-    add_note(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
-  when 'delnote'
-    delete_note(args.first.to_i) if args.length == 1
-  when 'list'
-    list(nil, args)
-  when 'show'
-    show(args.first.to_i) if args.length == 1
-  when 'help'
-    puts usage
-  when 'repl'
-    start_repl
-  else
-    list(nil, arguments)
+  begin
+    action = arguments.first
+    args = arguments[1..-1]
+    case action
+    when 'add'
+      add(args.join(' ')) unless args.nil? || args.empty?
+    when 'start'
+      args.length == 1 ? change_state(args.first.to_i, 'started') : list(nil, [':started'])
+    when 'done'
+      args.length == 1 ? change_state(args.first.to_i, 'done') : list(nil, [':done'])
+    when 'block'
+      args.length == 1 ? change_state(args.first.to_i, 'blocked') : list(nil, [':blocked'])
+    when 'prio'
+      set_priority(args.first.to_i) if args.length == 1
+    when 'append'
+      append(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
+    when 'rename'
+      rename(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
+    when 'del'
+      delete(args.first.to_i) if args.length == 1
+    when 'note'
+      add_note(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
+    when 'delnote'
+      delete_note(args.first.to_i) if args.length == 1
+    when 'list'
+      list(nil, args)
+    when 'show'
+      show(args.first.to_i) if args.length == 1
+    when 'help'
+      puts usage
+    when 'repl'
+      start_repl
+    else
+      list(nil, arguments)
+    end
+  rescue => error
+    puts "#{colorize('ERROR:', :red)} #{error}"
   end
 end
 
