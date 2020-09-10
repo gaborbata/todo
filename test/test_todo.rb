@@ -3,6 +3,7 @@ require 'test/unit'
 class TestTodo < Test::Unit::TestCase
 
   def setup
+    $stdout = StringIO.new
     @todo_file = "#{Dir.pwd}/todo.jsonl"
     ENV['HOME'] = Dir.pwd
     File.delete(@todo_file) if File.exist?(@todo_file)
