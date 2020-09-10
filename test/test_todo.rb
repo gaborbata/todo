@@ -3,20 +3,21 @@ require 'test/unit'
 class TestTodo < Test::Unit::TestCase
 
   def setup
+    @todo_file = "#{Dir.pwd}/todo.jsonl"
     ENV['HOME'] = Dir.pwd
+    File.delete(@todo_file) if File.exist?(@todo_file)
     require_relative '../bin/todo.rb'
     read ['add', 'Buy Milk']
   end
 
   def teardown
-    todo_file = "#{Dir.pwd}/todo.jsonl"
-    File.delete(todo_file) if File.exist?(todo_file)
+    File.delete(@todo_file) if File.exist?(@todo_file)
   end
 
   def test_add_new
     assert_match(
       /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\n/,
-      File.read("#{Dir.pwd}/todo.jsonl")
+      File.read(@todo_file)
     )
   end
 
@@ -24,7 +25,7 @@ class TestTodo < Test::Unit::TestCase
     read ['start', '1']
     assert_match(
       /{"state":"started","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\n/,
-      File.read("#{Dir.pwd}/todo.jsonl")
+      File.read(@todo_file)
     )
   end
 
@@ -32,7 +33,7 @@ class TestTodo < Test::Unit::TestCase
     read ['start', '2']
     assert_match(
       /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\n/,
-      File.read("#{Dir.pwd}/todo.jsonl")
+      File.read(@todo_file)
     )
   end
 
@@ -40,7 +41,7 @@ class TestTodo < Test::Unit::TestCase
     read ['done', '1']
     assert_match(
       /{"state":"done","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\n/,
-      File.read("#{Dir.pwd}/todo.jsonl")
+      File.read(@todo_file)
     )
   end
 
@@ -48,7 +49,7 @@ class TestTodo < Test::Unit::TestCase
     read ['block', '1']
     assert_match(
       /{"state":"blocked","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\n/,
-      File.read("#{Dir.pwd}/todo.jsonl")
+      File.read(@todo_file)
     )
   end
 
@@ -56,7 +57,7 @@ class TestTodo < Test::Unit::TestCase
     read ['prio', '1']
     assert_match(
       /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","priority":true}\n/,
-      File.read("#{Dir.pwd}/todo.jsonl")
+      File.read(@todo_file)
     )
   end
 
@@ -65,7 +66,7 @@ class TestTodo < Test::Unit::TestCase
     read ['prio', '1']
     assert_match(
       /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","priority":false}\n/,
-      File.read("#{Dir.pwd}/todo.jsonl")
+      File.read(@todo_file)
     )
   end
 
@@ -73,7 +74,7 @@ class TestTodo < Test::Unit::TestCase
     read ['append', '1', 'ASAP']
     assert_match(
       /{"state":"new","title":"Buy Milk ASAP","modified":"\d{4}-\d{2}-\d{2}"}\n/,
-      File.read("#{Dir.pwd}/todo.jsonl")
+      File.read(@todo_file)
     )
   end
 
@@ -81,7 +82,7 @@ class TestTodo < Test::Unit::TestCase
     read ['rename', '1', 'Buy Bread']
     assert_match(
       /{"state":"new","title":"Buy Bread","modified":"\d{4}-\d{2}-\d{2}"}\n/,
-      File.read("#{Dir.pwd}/todo.jsonl")
+      File.read(@todo_file)
     )
   end
 
@@ -89,7 +90,7 @@ class TestTodo < Test::Unit::TestCase
     read ['del', '1']
     assert_equal(
       '',
-      File.read("#{Dir.pwd}/todo.jsonl")
+      File.read(@todo_file)
     )
   end
 
@@ -97,7 +98,7 @@ class TestTodo < Test::Unit::TestCase
     read ['note', '1', 'test']
     assert_match(
       /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","note":\["test"\]}\n/,
-      File.read("#{Dir.pwd}/todo.jsonl")
+      File.read(@todo_file)
     )
   end
 
@@ -105,7 +106,7 @@ class TestTodo < Test::Unit::TestCase
     read ['delnote', '1']
     assert_match(
       /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","note":\[\]}\n/,
-      File.read("#{Dir.pwd}/todo.jsonl")
+      File.read(@todo_file)
     )
   end
 
