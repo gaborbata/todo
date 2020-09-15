@@ -47,7 +47,7 @@ STATES = {
   'default' => '[?]'
 }
 
-PRIO = {
+ORDER = {
   'new'     => 3,
   'done'    => 4,
   'started' => 2,
@@ -106,7 +106,7 @@ def usage
    USAGE
 end
 
-def get_tasks(item_to_check = nil)
+def load_tasks(item_to_check = nil)
   count = 0
   tasks = {}
   if File.exist?(TODO_FILE)
@@ -145,7 +145,7 @@ def add(text)
 end
 
 def append(item, text = '')
-  tasks = get_tasks(item)
+  tasks = load_tasks(item)
   tasks[item][:title] = [tasks[item][:title], text].join(' ')
   tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
@@ -153,7 +153,7 @@ def append(item, text = '')
 end
 
 def rename(item, text)
-  tasks = get_tasks(item)
+  tasks = load_tasks(item)
   tasks[item][:title] = text
   tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
@@ -161,14 +161,14 @@ def rename(item, text)
 end
 
 def delete(item)
-  tasks = get_tasks(item)
+  tasks = load_tasks(item)
   tasks.delete(item)
   write_tasks(tasks)
   list
 end
 
 def change_state(item, state)
-  tasks = get_tasks(item)
+  tasks = load_tasks(item)
   tasks[item][:state] = state
   tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
@@ -176,27 +176,27 @@ def change_state(item, state)
 end
 
 def set_priority(item)
-  tasks = get_tasks(item)
+  tasks = load_tasks(item)
   tasks[item][:priority] = !tasks[item][:priority]
   tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
   list(tasks)
 end
 
-def list(tasks_map = nil, patterns = nil)
+def list(tasks = nil, patterns = nil)
   items = {}
-  tasks = tasks_map || get_tasks
-  search_patterns = patterns.nil? || patterns.empty? ? [QUERIES[':active']] : patterns
+  tasks = tasks || load_tasks
+  patterns = patterns.nil? || patterns.empty? ? [QUERIES[':active']] : patterns
   tasks.each do |num, task|
     normalized_task = "state=#{task[:state]} #{task[:title]}"
     match = true
-    search_patterns.each do |pattern|
+    patterns.each do |pattern|
       match = false unless /#{QUERIES[pattern] || pattern}/ix.match(normalized_task)
     end
     items[num] = task if match
   end
   items = items.sort_by do |num, task|
-    [task[:priority] ? 0 : 1, PRIO[task[:state] || 'default'], num]
+    [task[:priority] ? 0 : 1, ORDER[task[:state] || 'default'], num]
   end
   items.each do |num, task|
     state = task[:state] || 'default'
@@ -210,7 +210,7 @@ def list(tasks_map = nil, patterns = nil)
 end
 
 def add_note(item, text)
-  tasks = get_tasks(item)
+  tasks = load_tasks(item)
   tasks[item][:note] ||= []
   tasks[item][:note].push(text)
   tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
@@ -219,7 +219,7 @@ def add_note(item, text)
 end
 
 def delete_note(item)
-  tasks = get_tasks(item)
+  tasks = load_tasks(item)
   tasks[item][:note] = []
   tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
@@ -227,14 +227,14 @@ def delete_note(item)
 end
 
 def show(item)
-  tasks = get_tasks(item)
+  tasks = load_tasks(item)
   tasks[item].each do |key, value|
     val = value.kind_of?(Array) ? "\n" + value.join("\n") : value
     puts "#{colorize(key.to_s.rjust(10, ' ') + ':', :cyan)} #{val}"
   end
 end
 
-def start_repl()
+def start_repl
   command = ''
   while !['exit', 'quit'].include?(command)
     if ['clear', 'cls'].include?(command)
