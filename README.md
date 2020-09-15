@@ -30,6 +30,12 @@ Legend:
 new [ ], done [x], started [>], blocked [!], priority *
 ```
 
+## How to install
+
+```
+gem install todo-jsonl
+```
+
 ## Demo
 
 ![todo](todo.gif)
