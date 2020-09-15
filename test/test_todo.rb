@@ -1,6 +1,24 @@
 require 'test/unit'
+require 'coverage'
 
 class TestTodo < Test::Unit::TestCase
+
+  class << self
+    def startup
+      Coverage.start if ENV['COVERAGE']
+    end
+
+    def shutdown
+      if ENV['COVERAGE']
+        coverage = Coverage.result.find { |name, result| name.end_with?('todo.rb') }
+        coverage = coverage ? coverage[1] : []
+        relevant = coverage.filter { |line| !line.nil? }.size
+        covered = coverage.filter { |line| !line.nil? && line > 0 }.size
+        printf("\nCoverage: %.2f%% (lines: %d total, %d relevant, %d covered, %d missed)\n",
+          covered.to_f / [relevant.to_f, 1.0].max * 100.0, coverage.size, relevant, covered, relevant - covered)
+      end
+    end
+  end
 
   def setup
     @original_stdout = $stdout
@@ -12,7 +30,7 @@ class TestTodo < Test::Unit::TestCase
     read ['add', 'Buy Milk']
   end
 
-  def teardown
+  def cleanup
     $stdout = @original_stdout
     File.delete(@todo_file) if File.exist?(@todo_file)
   end
