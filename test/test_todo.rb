@@ -12,8 +12,8 @@ class TestTodo < Test::Unit::TestCase
       if ENV['COVERAGE']
         coverage = Coverage.result.find { |name, result| name.end_with?('todo.rb') }
         coverage = coverage ? coverage[1] : []
-        relevant = coverage.filter { |line| !line.nil? }.size
-        covered = coverage.filter { |line| !line.nil? && line > 0 }.size
+        relevant = coverage.select { |line| !line.nil? }.size
+        covered = coverage.select { |line| !line.nil? && line > 0 }.size
         printf("\nCoverage: %.2f%% (lines: %d total, %d relevant, %d covered, %d missed)\n",
           covered.to_f / [relevant.to_f, 1.0].max * 100.0, coverage.size, relevant, covered, relevant - covered)
       end
