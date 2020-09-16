@@ -10,7 +10,7 @@ class TestTodo < Test::Unit::TestCase
 
     def shutdown
       if ENV['COVERAGE']
-        coverage = Coverage.result.find { |name, result| name.end_with?('todo.rb') }
+        coverage = Coverage.result.find { |name, result| name.end_with?('bin/todo.rb') }
         coverage = coverage ? coverage[1] : []
         relevant = coverage.select { |line| !line.nil? }.size
         covered = coverage.select { |line| !line.nil? && line > 0 }.size
