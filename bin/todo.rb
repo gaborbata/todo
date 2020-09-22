@@ -103,7 +103,7 @@ def usage
 
     Legend:
     #{STATES.select { |k, v| k != 'default' }.map { |k, v| "#{k} #{v}" }.join(', ') }, priority #{PRIORITY_FLAG}
-   USAGE
+  USAGE
 end
 
 def load_tasks(item_to_check = nil)
