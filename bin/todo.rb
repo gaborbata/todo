@@ -254,7 +254,7 @@ end
 def read(arguments)
   begin
     action = arguments.first
-    args = arguments[1..-1]
+    args = arguments[1..-1] || []
     case action
     when 'add'
       add(args.join(' ')) unless args.nil? || args.empty?
