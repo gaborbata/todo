@@ -95,7 +95,7 @@ def usage
 
     * list <regex> [regex...]        list tasks (only active tasks by default)
     * show <tasknumber>              show all task details
-    * repl                           enter read–eval–print loop mode
+    * repl                           enter read-eval-print loop mode
     * help                           this help screen
 
     With list command the following pre-defined regex patterns can be also used:
