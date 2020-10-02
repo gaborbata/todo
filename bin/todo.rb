@@ -25,6 +25,7 @@
 # SOFTWARE.
 
 require 'json'
+require 'date'
 
 DATE_FORMAT = '%Y-%m-%d'
 
@@ -72,6 +73,13 @@ QUERIES = {
   ':all'     => 'state=\w+'
 }
 
+TODAY = DateTime.now
+
+DUE_DATE_DAYS = ['today', 'tomorrow']
+(2..6).each do |day|
+  DUE_DATE_DAYS.push((TODAY.to_date + day).strftime('%A').downcase)
+end
+
 PRIORITY_FLAG = '*'
 
 TODO_FILE = "#{ENV['HOME']}/todo.jsonl"
@@ -86,6 +94,7 @@ def usage
     * done <tasknumber>              mark task as completed
     * block <tasknumber>             mark task as blocked
     * prio <tasknumber>              toggle high priority flag
+    * due <tasknumber> <date>        set due date
 
     * append <tasknumber> <text>     append text to task title
     * rename <tasknumber> <text>     rename task
@@ -183,6 +192,14 @@ def set_priority(item)
   list(tasks)
 end
 
+def due_date(item, date = '')
+  tasks = load_tasks(item)
+  tasks[item][:due] = date.empty? ? nil : Date.parse(date).strftime(DATE_FORMAT)
+  tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
+  write_tasks(tasks)
+  list(tasks)
+end
+
 def list(tasks = nil, patterns = nil)
   items = {}
   tasks = tasks || load_tasks
@@ -204,7 +221,19 @@ def list(tasks = nil, patterns = nil)
     display_state = colorize(STATES[state], color)
     title = task[:title].gsub(/@\w+/) { |tag| colorize(tag, :cyan) }
     priority_flag = task[:priority] ? colorize(PRIORITY_FLAG, :red) : ' '
-    puts "#{num.to_s.rjust(4, ' ')}:#{priority_flag}#{display_state} #{title}"
+    due_date = ''
+    if task[:due] && state != 'done'
+      date_diff = (Date.parse(task[:due]) - TODAY.to_date).to_i
+      if date_diff < 0
+        due_date = colorize("(#{date_diff.abs}d overdue)", :red)
+      elsif date_diff == 0 || date_diff == 1
+        due_date = colorize("(#{DUE_DATE_DAYS[date_diff]})", :yellow)
+      else
+        due_date = colorize("(#{DUE_DATE_DAYS[date_diff] || task[:due]})", :magenta) if date_diff > 1
+      end
+      due_date = ' ' + due_date
+    end
+    puts "#{num.to_s.rjust(4, ' ')}:#{priority_flag}#{display_state} #{title}#{due_date}"
   end
   puts 'No todos found' if items.empty?
 end
@@ -266,6 +295,8 @@ def read(arguments)
       args.length == 1 ? change_state(args.first.to_i, 'blocked') : list(nil, [':blocked'])
     when 'prio'
       set_priority(args.first.to_i) if args.length == 1
+    when 'due'
+      due_date(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
     when 'append'
       append(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
     when 'rename'
