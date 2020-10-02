@@ -194,7 +194,7 @@ end
 
 def due_date(item, date = '')
   tasks = load_tasks(item)
-  tasks[item][:due] = date.empty? ? nil : Date.parse(date).strftime(DATE_FORMAT)
+  tasks[item][:due] = date.nil? || date.empty? ? nil : Date.parse(date).strftime(DATE_FORMAT)
   tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
   list(tasks)
@@ -296,15 +296,15 @@ def read(arguments)
     when 'prio'
       set_priority(args.first.to_i) if args.length == 1
     when 'due'
-      due_date(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
+      due_date(args.first.to_i, (args[1..-1] || []).join(' ')) unless args.length < 1
     when 'append'
-      append(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
+      append(args.first.to_i, args[1..-1].join(' ')) unless args.length < 2
     when 'rename'
-      rename(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
+      rename(args.first.to_i, args[1..-1].join(' ')) unless args.length < 2
     when 'del'
       delete(args.first.to_i) if args.length == 1
     when 'note'
-      add_note(args.first.to_i, args[1..-1].join(' ')) unless args.length < 1
+      add_note(args.first.to_i, args[1..-1].join(' ')) unless args.length < 2
     when 'delnote'
       delete_note(args.first.to_i) if args.length == 1
     when 'list'
