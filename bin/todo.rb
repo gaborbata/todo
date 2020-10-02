@@ -213,7 +213,7 @@ def list(tasks = nil, patterns = nil)
     items[num] = task if match
   end
   items = items.sort_by do |num, task|
-    [task[:priority] ? 0 : 1, ORDER[task[:state] || 'default'], num]
+    [task[:priority] ? 0 : 1, ORDER[task[:state] || 'default'], task[:due] || 'n/a', num]
   end
   items.each do |num, task|
     state = task[:state] || 'default'
