@@ -10,6 +10,7 @@ Commands:
 * start <tasknumber>             mark task as started
 * done <tasknumber>              mark task as completed
 * block <tasknumber>             mark task as blocked
+* reset <tasknumber>             reset task to new state
 * prio <tasknumber>              toggle high priority flag
 * due <tasknumber> <date>        set due date
 

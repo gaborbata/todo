@@ -93,6 +93,7 @@ def usage
     * start <tasknumber>             mark task as started
     * done <tasknumber>              mark task as completed
     * block <tasknumber>             mark task as blocked
+    * reset <tasknumber>             reset task to new state
     * prio <tasknumber>              toggle high priority flag
     * due <tasknumber> <date>        set due date
 
@@ -213,7 +214,7 @@ def list(tasks = nil, patterns = nil)
     items[num] = task if match
   end
   items = items.sort_by do |num, task|
-    [task[:priority] ? 0 : 1, ORDER[task[:state] || 'default'], task[:due] || 'n/a', num]
+    [task[:priority] && task[:state] != 'done' ? 0 : 1, ORDER[task[:state] || 'default'], task[:due] || 'n/a', num]
   end
   items.each do |num, task|
     state = task[:state] || 'default'
@@ -293,6 +294,8 @@ def read(arguments)
       args.length == 1 ? change_state(args.first.to_i, 'done') : list(nil, [':done'])
     when 'block'
       args.length == 1 ? change_state(args.first.to_i, 'blocked') : list(nil, [':blocked'])
+    when 'reset'
+      args.length == 1 ? change_state(args.first.to_i, 'new') : list(nil, [':new'])
     when 'prio'
       set_priority(args.first.to_i) if args.length == 1
     when 'due'
