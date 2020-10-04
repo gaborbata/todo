@@ -53,6 +53,17 @@ class TestTodo < Test::Unit::TestCase
     assert_equal("   1: \e[32m[>]\e[0m Buy Milk\n", $stdout.string)
   end
 
+  def test_reset
+    read ['start', '1']
+    $stdout = StringIO.new
+    read ['reset', '1']
+    assert_match(
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\n/,
+      File.read(@todo_file)
+    )
+    assert_equal("   1: \e[37m[ ]\e[0m Buy Milk\n", $stdout.string)
+  end
+
   def test_start_not_existing_todo
     $stdout = StringIO.new
     read ['start', '2']
