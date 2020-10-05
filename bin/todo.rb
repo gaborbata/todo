@@ -95,7 +95,7 @@ def usage
     * block <tasknumber>             mark task as blocked
     * reset <tasknumber>             reset task to new state
     * prio <tasknumber>              toggle high priority flag
-    * due <tasknumber> <date>        set due date
+    * due <tasknumber> <date>        set due date (in YYYY-MM-DD format)
 
     * append <tasknumber> <text>     append text to task title
     * rename <tasknumber> <text>     rename task
@@ -287,7 +287,8 @@ def read(arguments)
     args = arguments[1..-1] || []
     case action
     when 'add'
-      add(args.join(' ')) unless args.nil? || args.empty?
+      raise action + ' command requires at least one parameter' if args.nil? || args.empty?
+      add(args.join(' '))
     when 'start'
       args.length == 1 ? change_state(args.first.to_i, 'started') : list(nil, [':started'])
     when 'done'
@@ -297,23 +298,31 @@ def read(arguments)
     when 'reset'
       args.length == 1 ? change_state(args.first.to_i, 'new') : list(nil, [':new'])
     when 'prio'
-      set_priority(args.first.to_i) if args.length == 1
+      raise action + ' command requires exactly one parameter' if args.length != 1
+      set_priority(args.first.to_i)
     when 'due'
-      due_date(args.first.to_i, (args[1..-1] || []).join(' ')) unless args.length < 1
+      raise action + ' command requires at least one parameter' if args.length < 1
+      due_date(args.first.to_i, (args[1..-1] || []).join(' '))
     when 'append'
-      append(args.first.to_i, args[1..-1].join(' ')) unless args.length < 2
+      raise action + ' command requires at least two parameters' if args.length < 2
+      append(args.first.to_i, args[1..-1].join(' '))
     when 'rename'
-      rename(args.first.to_i, args[1..-1].join(' ')) unless args.length < 2
+      raise action + ' command requires at least two parameters' if args.length < 2
+      rename(args.first.to_i, args[1..-1].join(' '))
     when 'del'
-      delete(args.first.to_i) if args.length == 1
+      raise action + ' command requires exactly one parameter' if args.length != 1
+      delete(args.first.to_i)
     when 'note'
-      add_note(args.first.to_i, args[1..-1].join(' ')) unless args.length < 2
+      raise action + ' command requires at least two parameters' if args.length < 2
+      add_note(args.first.to_i, args[1..-1].join(' '))
     when 'delnote'
-      delete_note(args.first.to_i) if args.length == 1
+      raise action + ' command requires exactly one parameter' if args.length != 1
+      delete_note(args.first.to_i)
     when 'list'
       list(nil, args)
     when 'show'
-      show(args.first.to_i) if args.length == 1
+      raise action + ' command requires exactly one parameter' if args.length != 1
+      show(args.first.to_i)
     when 'help'
       puts usage
     when 'repl'

@@ -12,7 +12,7 @@ Commands:
 * block <tasknumber>             mark task as blocked
 * reset <tasknumber>             reset task to new state
 * prio <tasknumber>              toggle high priority flag
-* due <tasknumber> <date>        set due date
+* due <tasknumber> <date>        set due date (in YYYY-MM-DD format)
 
 * append <tasknumber> <text>     append text to task title
 * rename <tasknumber> <text>     rename task
@@ -31,6 +31,8 @@ With list command the following pre-defined regex patterns can be also used:
 Legend:
 new [ ], done [x], started [>], blocked [!], priority *
 ```
+
+`todo.jsonl` file stores the todo data which is saved into the `$HOME` folder of the current user.
 
 ## How to install
 
