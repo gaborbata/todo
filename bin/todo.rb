@@ -74,11 +74,8 @@ QUERIES = {
 }
 
 TODAY = DateTime.now
-
-DUE_DATE_DAYS = ['today', 'tomorrow']
-(2..6).each do |day|
-  DUE_DATE_DAYS.push((TODAY.to_date + day).strftime('%A').downcase)
-end
+DUE_DATE_DAYS = (0..6).map do |day| (TODAY.to_date + day).strftime('%A').downcase end
+DUE_DATE_DAYS_SIMPLE = ['today', 'tomorrow']
 
 PRIORITY_FLAG = '*'
 
@@ -195,7 +192,12 @@ end
 
 def due_date(item, date = '')
   tasks = load_tasks(item)
-  tasks[item][:due] = date.nil? || date.empty? ? nil : Date.parse(date).strftime(DATE_FORMAT)
+  day_index = DUE_DATE_DAYS.index(date.to_s.downcase) || DUE_DATE_DAYS_SIMPLE.index(date.to_s.downcase)
+  if day_index
+    tasks[item][:due] = (TODAY.to_date + day_index).strftime(DATE_FORMAT)
+  else
+    tasks[item][:due] = date.nil? || date.empty? ? nil : Date.parse(date).strftime(DATE_FORMAT)
+  end
   tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
   list(tasks)
@@ -229,7 +231,7 @@ def list(tasks = nil, patterns = nil)
       if date_diff < 0
         due_date = colorize("(#{date_diff.abs}d overdue)", :red)
       elsif date_diff == 0 || date_diff == 1
-        due_date = colorize("(#{DUE_DATE_DAYS[date_diff]})", :yellow)
+        due_date = colorize("(#{DUE_DATE_DAYS_SIMPLE[date_diff]})", :yellow)
       else
         due_date = colorize("(#{DUE_DATE_DAYS[date_diff] || task[:due]})", :magenta) if date_diff > 1
       end
@@ -291,12 +293,16 @@ def read(arguments)
       raise action + ' command requires at least one parameter' if args.nil? || args.empty?
       add(args.join(' '))
     when 'start'
+      raise action + ' command can receive only one task number' if args.length > 1
       args.length == 1 ? change_state(args.first.to_i, 'started') : list(nil, [':started'])
     when 'done'
+      raise action + ' command can receive only one task number' if args.length > 1
       args.length == 1 ? change_state(args.first.to_i, 'done') : list(nil, [':done'])
     when 'block'
+      raise action + ' command can receive only one task number' if args.length > 1
       args.length == 1 ? change_state(args.first.to_i, 'blocked') : list(nil, [':blocked'])
     when 'reset'
+      raise action + ' command can receive only one task number' if args.length > 1
       args.length == 1 ? change_state(args.first.to_i, 'new') : list(nil, [':new'])
     when 'prio'
       raise action + ' command requires exactly one parameter' if args.length != 1
