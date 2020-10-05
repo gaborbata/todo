@@ -204,6 +204,7 @@ end
 def list(tasks = nil, patterns = nil)
   items = {}
   tasks = tasks || load_tasks
+  task_indent = [tasks.keys.max.to_s.size, 4].max
   patterns = patterns.nil? || patterns.empty? ? [QUERIES[':active']] : patterns
   tasks.each do |num, task|
     normalized_task = "state=#{task[:state]} #{task[:title]}"
@@ -234,7 +235,7 @@ def list(tasks = nil, patterns = nil)
       end
       due_date = ' ' + due_date
     end
-    puts "#{num.to_s.rjust(4, ' ')}:#{priority_flag}#{display_state} #{title}#{due_date}"
+    puts "#{num.to_s.rjust(task_indent, ' ')}:#{priority_flag}#{display_state} #{title}#{due_date}"
   end
   puts 'No todos found' if items.empty?
 end
