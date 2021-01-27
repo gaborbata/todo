@@ -200,4 +200,13 @@ class TestTodo < Test::Unit::TestCase
     assert_equal("   1: \e[34m[x]\e[0m Buy Milk\n", $stdout.string)
   end
 
+  def test_list_by_due_date
+    $stdout = StringIO.new
+    read ['due', '1', Time.now.strftime(DATE_FORMAT)]
+    read ['add', 'Buy Bread @unplanned']
+    $stdout = StringIO.new
+    read ['list', ':today']
+    assert_equal("   1: \e[37m[ ]\e[0m Buy Milk \e[33m(today)\e[0m\n", $stdout.string)
+  end
+
 end

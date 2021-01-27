@@ -2,7 +2,7 @@
 
 # todo.rb - todo list manager inspired by todo.txt using the jsonl format.
 #
-# Copyright (c) 2020 Gabor Bata
+# Copyright (c) 2020-2021 Gabor Bata
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -26,8 +26,6 @@
 
 require 'json'
 require 'date'
-
-DATE_FORMAT = '%Y-%m-%d'
 
 COLOR_CODES = {
   black:   30,
@@ -64,18 +62,24 @@ COLORS = {
   'default' => :magenta
 }
 
-QUERIES = {
-  ':active'  => 'state=(new|started|blocked)',
-  ':done'    => 'state=done',
-  ':blocked' => 'state=blocked',
-  ':started' => 'state=started',
-  ':new'     => 'state=new',
-  ':all'     => 'state=\w+'
-}
-
 TODAY = DateTime.now
-DUE_DATE_DAYS = (0..6).map do |day| (TODAY.to_date + day).strftime('%A').downcase end
+NEXT_7_DAYS = (0..6).map do |day| (TODAY.to_date + day) end
+DATE_FORMAT = '%Y-%m-%d'
+DUE_DATE_DAYS = NEXT_7_DAYS.map do |day| day.strftime('%A').downcase end
+DUE_DATES_FOR_QUERIES = NEXT_7_DAYS.map do |day| day.strftime(DATE_FORMAT) end
 DUE_DATE_DAYS_SIMPLE = ['today', 'tomorrow']
+
+QUERIES = {
+  ':active'    => 'state=(new|started|blocked)',
+  ':done'      => 'state=done',
+  ':blocked'   => 'state=blocked',
+  ':started'   => 'state=started',
+  ':new'       => 'state=new',
+  ':all'       => 'state=\w+',
+  ':today'     => "due=#{DUE_DATES_FOR_QUERIES[0]}",
+  ':tomorrow'  => "due=#{DUE_DATES_FOR_QUERIES[1]}",
+  ':next7days' => "due=(#{DUE_DATES_FOR_QUERIES.join('|')})"
+}
 
 PRIORITY_FLAG = '*'
 
@@ -209,7 +213,7 @@ def list(tasks = nil, patterns = nil)
   task_indent = [tasks.keys.max.to_s.size, 4].max
   patterns = patterns.nil? || patterns.empty? ? [QUERIES[':active']] : patterns
   tasks.each do |num, task|
-    normalized_task = "state=#{task[:state]} #{task[:title]}"
+    normalized_task = "state=#{task[:state]} due=#{task[:due]} #{task[:title]}"
     match = true
     patterns.each do |pattern|
       match = false unless /#{QUERIES[pattern] || pattern}/ix.match(normalized_task)

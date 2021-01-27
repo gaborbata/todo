@@ -26,7 +26,7 @@ Commands:
 * help                           this help screen
 
 With list command the following pre-defined regex patterns can be also used:
-:active, :done, :blocked, :started, :new, :all
+:active, :done, :blocked, :started, :new, :all, :today, :tomorrow, :next7days
 
 Legend:
 new [ ], done [x], started [>], blocked [!], priority *
