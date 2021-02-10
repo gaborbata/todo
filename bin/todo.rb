@@ -114,6 +114,8 @@ def usage
 
     Legend:
     #{STATES.select { |k, v| k != 'default' }.map { |k, v| "#{k} #{v}" }.join(', ') }, priority #{PRIORITY_FLAG}
+
+    Todo file: #{TODO_FILE}
   USAGE
 end
 
