@@ -1,5 +1,6 @@
 require 'test/unit'
 require 'coverage'
+require 'stringio'
 
 class TestTodo < Test::Unit::TestCase
 
