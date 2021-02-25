@@ -310,7 +310,9 @@ end
 
 def convert_due_date(date = '')
   due = nil
-  day_index = DUE_DATE_DAYS.index(date.to_s.downcase) || DUE_DATE_DAYS_SIMPLE.index(date.to_s.downcase)
+  day_index = DUE_DATE_DAYS.index(date.to_s.downcase) ||
+    DUE_DATE_DAYS_SIMPLE.index(date.to_s.downcase) ||
+    DUE_DATE_DAYS.map do |day| day[0..2] end.index(date.to_s.downcase)
   if day_index
     due = (TODAY.to_date + day_index).strftime(DATE_FORMAT)
   else
