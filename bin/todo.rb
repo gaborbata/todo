@@ -91,10 +91,10 @@ def usage
 
     Commands:
     * add <text>                     add new task
-    * start <tasknumber>             mark task as started
-    * done <tasknumber>              mark task as completed
-    * block <tasknumber>             mark task as blocked
-    * reset <tasknumber>             reset task to new state
+    * start <tasknumber> [text]      mark task as started, with optional note
+    * done <tasknumber> [text]       mark task as completed, with optional note
+    * block <tasknumber> [text]      mark task as blocked, with optional note
+    * reset <tasknumber> [text]      reset task to new state, with optional note
     * prio <tasknumber>              toggle high priority flag
     * due <tasknumber> <date>        set due date (in YYYY-MM-DD format)
 
@@ -180,10 +180,14 @@ def delete(item)
   list
 end
 
-def change_state(item, state)
+def change_state(item, state, note = nil)
   tasks = load_tasks(item)
   tasks[item][:state] = state
   tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
+  if !note.nil? && !note.empty?
+    tasks[item][:note] ||= []
+    tasks[item][:note].push(note)
+  end
   write_tasks(tasks)
   list(tasks)
 end
@@ -299,17 +303,13 @@ def read(arguments)
       raise action + ' command requires at least one parameter' if args.nil? || args.empty?
       add(args.join(' '))
     when 'start'
-      raise action + ' command can receive only one task number' if args.length > 1
-      args.length == 1 ? change_state(args.first.to_i, 'started') : list(nil, [':started'])
+      args.length > 0 ? change_state(args.first.to_i, 'started', args[1..-1].join(' ')) : list(nil, [':started'])
     when 'done'
-      raise action + ' command can receive only one task number' if args.length > 1
-      args.length == 1 ? change_state(args.first.to_i, 'done') : list(nil, [':done'])
+      args.length > 0 ? change_state(args.first.to_i, 'done', args[1..-1].join(' ')) : list(nil, [':done'])
     when 'block'
-      raise action + ' command can receive only one task number' if args.length > 1
-      args.length == 1 ? change_state(args.first.to_i, 'blocked') : list(nil, [':blocked'])
+      args.length > 0 ? change_state(args.first.to_i, 'blocked', args[1..-1].join(' ')) : list(nil, [':blocked'])
     when 'reset'
-      raise action + ' command can receive only one task number' if args.length > 1
-      args.length == 1 ? change_state(args.first.to_i, 'new') : list(nil, [':new'])
+      args.length > 0 ? change_state(args.first.to_i, 'new', args[1..-1].join(' ')) : list(nil, [':new'])
     when 'prio'
       raise action + ' command requires exactly one parameter' if args.length != 1
       set_priority(args.first.to_i)

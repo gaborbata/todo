@@ -172,6 +172,14 @@ class TestTodo < Test::Unit::TestCase
     )
   end
 
+  def test_change_state_with_note
+    read ['block', '1', 'note']
+    assert_match(
+      /{"state":"blocked","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","note":\["note"\]}\n/,
+      File.read(@todo_file)
+    )
+  end
+
   def test_without_parameters
     $stdout = StringIO.new
     read []
