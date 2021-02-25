@@ -69,6 +69,9 @@ DUE_DATE_DAYS = NEXT_7_DAYS.map do |day| day.strftime('%A').downcase end
 DUE_DATES_FOR_QUERIES = NEXT_7_DAYS.map do |day| day.strftime(DATE_FORMAT) end
 DUE_DATE_DAYS_SIMPLE = ['today', 'tomorrow']
 
+DUE_DATE_TAG_PATTERN = /(^| )due:([a-zA-Z0-9-]+)/
+CONTEXT_TAG_PATTERN = /(^| )[@+][\w-]+/
+
 QUERIES = {
   ':active'    => 'state=(new|started|blocked)',
   ':done'      => 'state=done',
@@ -96,7 +99,7 @@ def usage
     * block <tasknumber> [text]      mark task as blocked, with optional note
     * reset <tasknumber> [text]      reset task to new state, with optional note
     * prio <tasknumber>              toggle high priority flag
-    * due <tasknumber> <date>        set due date (in YYYY-MM-DD format)
+    * due <tasknumber> [date]        set/unset due date (in YYYY-MM-DD format)
 
     * append <tasknumber> <text>     append text to task title
     * rename <tasknumber> <text>     rename task
@@ -111,6 +114,8 @@ def usage
 
     With list command the following pre-defined regex patterns can be also used:
     #{QUERIES.keys.join(', ')}
+
+    Due dates can be also added via tags in task title: "due:YYYY-MM-DD"
 
     Legend:
     #{STATES.select { |k, v| k != 'default' }.map { |k, v| "#{k} #{v}" }.join(', ') }, priority #{PRIORITY_FLAG}
@@ -145,12 +150,22 @@ def write_tasks(tasks)
   end
 end
 
+def postprocess_tags(task)
+  title = task[:title]
+  match_data = title.match(DUE_DATE_TAG_PATTERN)
+  if match_data
+    task[:title] = title.gsub(DUE_DATE_TAG_PATTERN, '')
+    task[:due] = convert_due_date(match_data[2])
+  end
+end
+
 def add(text)
   task = {
     state: 'new',
     title: text,
     modified: Time.now.strftime(DATE_FORMAT)
   }
+  postprocess_tags(task)
   File.open(TODO_FILE, 'a:UTF-8') do |file|
     file.write(JSON.generate(task) + "\n")
   end
@@ -161,6 +176,7 @@ def append(item, text = '')
   tasks = load_tasks(item)
   tasks[item][:title] = [tasks[item][:title], text].join(' ')
   tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
+  postprocess_tags(tasks[item])
   write_tasks(tasks)
   list(tasks)
 end
@@ -169,6 +185,7 @@ def rename(item, text)
   tasks = load_tasks(item)
   tasks[item][:title] = text
   tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
+  postprocess_tags(tasks[item])
   write_tasks(tasks)
   list(tasks)
 end
@@ -200,14 +217,9 @@ def set_priority(item)
   list(tasks)
 end
 
-def due_date(item, date = '')
+def due_date(item, date = '', task = nil)
   tasks = load_tasks(item)
-  day_index = DUE_DATE_DAYS.index(date.to_s.downcase) || DUE_DATE_DAYS_SIMPLE.index(date.to_s.downcase)
-  if day_index
-    tasks[item][:due] = (TODAY.to_date + day_index).strftime(DATE_FORMAT)
-  else
-    tasks[item][:due] = date.nil? || date.empty? ? nil : Date.parse(date).strftime(DATE_FORMAT)
-  end
+  tasks[item][:due] = convert_due_date(date)
   tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
   write_tasks(tasks)
   list(tasks)
@@ -233,7 +245,9 @@ def list(tasks = nil, patterns = nil)
     state = task[:state] || 'default'
     color = COLORS[state]
     display_state = colorize(STATES[state], color)
-    title = task[:title].gsub(/@\w+/) { |tag| colorize(tag, :cyan) }
+    title = task[:title].gsub(CONTEXT_TAG_PATTERN) do |tag|
+      (tag.start_with?(' ') ? ' ' : '') + colorize(tag.strip, :cyan)
+    end
     priority_flag = task[:priority] ? colorize(PRIORITY_FLAG, :red) : ' '
     due_date = ''
     if task[:due] && state != 'done'
@@ -292,6 +306,17 @@ end
 
 def colorize(text, color)
   "\e[#{COLOR_CODES[color]}m#{text}\e[0m"
+end
+
+def convert_due_date(date = '')
+  due = nil
+  day_index = DUE_DATE_DAYS.index(date.to_s.downcase) || DUE_DATE_DAYS_SIMPLE.index(date.to_s.downcase)
+  if day_index
+    due = (TODAY.to_date + day_index).strftime(DATE_FORMAT)
+  else
+    due = date.nil? || date.empty? ? nil : Date.parse(date).strftime(DATE_FORMAT)
+  end
+  return due
 end
 
 def read(arguments)

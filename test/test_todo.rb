@@ -115,6 +115,38 @@ class TestTodo < Test::Unit::TestCase
     assert_equal("   1: \e[37m[ ]\e[0m Buy Milk \e[33m(today)\e[0m\n", $stdout.string)
   end
 
+  def test_unset_due_date
+    read ['due', '1', Time.now.strftime(DATE_FORMAT)]
+    $stdout = StringIO.new
+    read ['due', '1']
+    assert_match(
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","due":null}\n/,
+      File.read(@todo_file)
+    )
+    assert_equal("   1: \e[37m[ ]\e[0m Buy Milk\n", $stdout.string)
+  end
+
+  def test_due_date_tag
+    read ['del', '1']
+    $stdout = StringIO.new
+    read ['add', "Buy Milk ASAP due:#{Time.now.strftime(DATE_FORMAT)}"]
+    assert_match(
+      /{"state":"new","title":"Buy Milk ASAP","modified":"\d{4}-\d{2}-\d{2}","due":"\d{4}-\d{2}-\d{2}"}\n/,
+      File.read(@todo_file)
+    )
+    assert_equal("   1: \e[37m[ ]\e[0m Buy Milk ASAP \e[33m(today)\e[0m\n", $stdout.string)
+  end
+
+  def test_due_date_tag_in_rename
+    $stdout = StringIO.new
+    read ['rename', '1', "Buy Milk ASAP due:#{Time.now.strftime(DATE_FORMAT)}"]
+    assert_match(
+      /{"state":"new","title":"Buy Milk ASAP","modified":"\d{4}-\d{2}-\d{2}","due":"\d{4}-\d{2}-\d{2}"}\n/,
+      File.read(@todo_file)
+    )
+    assert_equal("   1: \e[37m[ ]\e[0m Buy Milk ASAP \e[33m(today)\e[0m\n", $stdout.string)
+  end
+
   def test_toggle_priority
     read ['prio', '1']
     $stdout = StringIO.new
@@ -195,11 +227,18 @@ class TestTodo < Test::Unit::TestCase
     )
   end
 
-  def test_list_by_tag
+  def test_list_by_context_tag
     read ['add', 'Buy Bread @breakfast']
     $stdout = StringIO.new
     read ['list', '@breakfast']
     assert_equal("   2: \e[37m[ ]\e[0m Buy Bread \e[36m@breakfast\e[0m\n", $stdout.string)
+  end
+
+  def test_list_by_project_tag
+    read ['add', 'Buy Bread +breakfast']
+    $stdout = StringIO.new
+    read ['list', '\\+breakfast']
+    assert_equal("   2: \e[37m[ ]\e[0m Buy Bread \e[36m+breakfast\e[0m\n", $stdout.string)
   end
 
   def test_list_by_pre_defined_pattern

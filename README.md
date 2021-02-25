@@ -7,12 +7,12 @@ Usage: todo <command> <arguments>
 
 Commands:
 * add <text>                     add new task
-* start <tasknumber>             mark task as started
-* done <tasknumber>              mark task as completed
-* block <tasknumber>             mark task as blocked
-* reset <tasknumber>             reset task to new state
+* start <tasknumber> [text]      mark task as started, with optional note
+* done <tasknumber> [text]       mark task as completed, with optional note
+* block <tasknumber> [text]      mark task as blocked, with optional note
+* reset <tasknumber> [text]      reset task to new state, with optional note
 * prio <tasknumber>              toggle high priority flag
-* due <tasknumber> <date>        set due date (in YYYY-MM-DD format)
+* due <tasknumber> [date]        set/unset due date (in YYYY-MM-DD format)
 
 * append <tasknumber> <text>     append text to task title
 * rename <tasknumber> <text>     rename task
@@ -22,11 +22,13 @@ Commands:
 
 * list <regex> [regex...]        list tasks (only active tasks by default)
 * show <tasknumber>              show all task details
-* repl                           enter read–eval–print loop mode
+* repl                           enter read-eval-print loop mode
 * help                           this help screen
 
 With list command the following pre-defined regex patterns can be also used:
 :active, :done, :blocked, :started, :new, :all, :today, :tomorrow, :next7days
+
+Due dates can be also added via tags in task title: "due:YYYY-MM-DD"
 
 Legend:
 new [ ], done [x], started [>], blocked [!], priority *
