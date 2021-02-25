@@ -151,12 +151,12 @@ def write_tasks(tasks)
 end
 
 def postprocess_tags(task)
-  title = task[:title]
-  match_data = title.match(DUE_DATE_TAG_PATTERN)
+  match_data = task[:title].match(DUE_DATE_TAG_PATTERN)
   if match_data
-    task[:title] = title.gsub(DUE_DATE_TAG_PATTERN, '')
+    task[:title] = task[:title].gsub(DUE_DATE_TAG_PATTERN, '')
     task[:due] = convert_due_date(match_data[2])
   end
+  raise 'title must not be empty' if task[:title].empty?
 end
 
 def add(text)
