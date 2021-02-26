@@ -11,7 +11,7 @@ Commands:
 * done <tasknumber> [text]       mark task as completed, with optional note
 * block <tasknumber> [text]      mark task as blocked, with optional note
 * reset <tasknumber> [text]      reset task to new state, with optional note
-* prio <tasknumber>              toggle high priority flag
+* prio <tasknumber> [text]       toggle high priority flag, with optional note
 * due <tasknumber> [date]        set/unset due date (in YYYY-MM-DD format)
 
 * append <tasknumber> <text>     append text to task title

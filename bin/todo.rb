@@ -98,7 +98,7 @@ def usage
     * done <tasknumber> [text]       mark task as completed, with optional note
     * block <tasknumber> [text]      mark task as blocked, with optional note
     * reset <tasknumber> [text]      reset task to new state, with optional note
-    * prio <tasknumber>              toggle high priority flag
+    * prio <tasknumber> [text]       toggle high priority flag, with optional note
     * due <tasknumber> [date]        set/unset due date (in YYYY-MM-DD format)
 
     * append <tasknumber> <text>     append text to task title
@@ -209,10 +209,14 @@ def change_state(item, state, note = nil)
   list(tasks)
 end
 
-def set_priority(item)
+def set_priority(item, note = nil)
   tasks = load_tasks(item)
   tasks[item][:priority] = !tasks[item][:priority]
   tasks[item][:modified] = Time.now.strftime(DATE_FORMAT)
+  if !note.nil? && !note.empty?
+    tasks[item][:note] ||= []
+    tasks[item][:note].push(note)
+  end
   write_tasks(tasks)
   list(tasks)
 end
@@ -330,16 +334,16 @@ def read(arguments)
       raise action + ' command requires at least one parameter' if args.nil? || args.empty?
       add(args.join(' '))
     when 'start'
-      args.length > 0 ? change_state(args.first.to_i, 'started', args[1..-1].join(' ')) : list(nil, [':started'])
+      args.length > 0 ? change_state(args.first.to_i, 'started', (args[1..-1] || []).join(' ')) : list(nil, [':started'])
     when 'done'
-      args.length > 0 ? change_state(args.first.to_i, 'done', args[1..-1].join(' ')) : list(nil, [':done'])
+      args.length > 0 ? change_state(args.first.to_i, 'done', (args[1..-1] || []).join(' ')) : list(nil, [':done'])
     when 'block'
-      args.length > 0 ? change_state(args.first.to_i, 'blocked', args[1..-1].join(' ')) : list(nil, [':blocked'])
+      args.length > 0 ? change_state(args.first.to_i, 'blocked', (args[1..-1] || []).join(' ')) : list(nil, [':blocked'])
     when 'reset'
-      args.length > 0 ? change_state(args.first.to_i, 'new', args[1..-1].join(' ')) : list(nil, [':new'])
+      args.length > 0 ? change_state(args.first.to_i, 'new', (args[1..-1] || []).join(' ')) : list(nil, [':new'])
     when 'prio'
-      raise action + ' command requires exactly one parameter' if args.length != 1
-      set_priority(args.first.to_i)
+      raise action + ' command requires at least one parameter' if args.length < 1
+      set_priority(args.first.to_i, (args[1..-1] || []).join(' '))
     when 'due'
       raise action + ' command requires at least one parameter' if args.length < 1
       due_date(args.first.to_i, (args[1..-1] || []).join(' '))

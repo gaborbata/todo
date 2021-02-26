@@ -105,6 +105,16 @@ class TestTodo < Test::Unit::TestCase
     assert_equal("   1:\e[31m*\e[0m\e[37m[ ]\e[0m Buy Milk\n", $stdout.string)
   end
 
+  def test_priority_with_note
+    $stdout = StringIO.new
+    read ['prio', '1', 'very important']
+    assert_match(
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","priority":true,"note":\["very important"\]}\n/,
+      File.read(@todo_file)
+    )
+    assert_equal("   1:\e[31m*\e[0m\e[37m[ ]\e[0m Buy Milk\n", $stdout.string)
+  end
+
   def test_due_date
     $stdout = StringIO.new
     read ['due', '1', Time.now.strftime(DATE_FORMAT)]
