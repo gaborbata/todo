@@ -281,7 +281,7 @@ class Todo
     list(tasks)
   end
 
-  def due_date(item, date = '', task = nil)
+  def due_date(item, date = '')
     tasks = load_tasks(item)
     tasks[item][:due] = convert_due_date(date)
     tasks[item].delete(:due) if tasks[item][:due].nil?
