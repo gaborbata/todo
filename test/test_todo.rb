@@ -4,6 +4,8 @@ require 'stringio'
 
 class TestTodo < Test::Unit::TestCase
 
+  DATE_FORMAT = '%Y-%m-%d'
+
   class << self
     def startup
       Coverage.start if ENV['COVERAGE']
@@ -28,7 +30,8 @@ class TestTodo < Test::Unit::TestCase
     ENV['HOME'] = Dir.pwd
     File.delete(@todo_file) if File.exist?(@todo_file)
     require_relative '../bin/todo.rb'
-    read ['add', 'Buy Milk']
+    @todo = Todo.new
+    @todo.execute ['add', 'Buy Milk']
   end
 
   def cleanup
@@ -38,7 +41,7 @@ class TestTodo < Test::Unit::TestCase
 
   def test_add_new
     assert_match(
-      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\n/,
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
     )
     assert_equal("   1: \e[37m[ ]\e[0m Buy Milk", $stdout.string.split("\n").last)
@@ -46,20 +49,20 @@ class TestTodo < Test::Unit::TestCase
 
   def test_start
     $stdout = StringIO.new
-    read ['start', '1']
+    @todo.execute ['start', '1']
     assert_match(
-      /{"state":"started","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\n/,
+      /{"state":"started","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
     )
     assert_equal("   1: \e[32m[>]\e[0m Buy Milk\n", $stdout.string)
   end
 
   def test_reset
-    read ['start', '1']
+    @todo.execute ['start', '1']
     $stdout = StringIO.new
-    read ['reset', '1']
+    @todo.execute ['reset', '1']
     assert_match(
-      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\n/,
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
     )
     assert_equal("   1: \e[37m[ ]\e[0m Buy Milk\n", $stdout.string)
@@ -67,9 +70,9 @@ class TestTodo < Test::Unit::TestCase
 
   def test_start_not_existing_todo
     $stdout = StringIO.new
-    read ['start', '2']
+    @todo.execute ['start', '2']
     assert_match(
-      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\n/,
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
     )
     assert_equal("\e[31mERROR:\e[0m 2: No such todo\n", $stdout.string)
@@ -77,9 +80,9 @@ class TestTodo < Test::Unit::TestCase
 
   def test_done
     $stdout = StringIO.new
-    read ['done', '1']
+    @todo.execute ['done', '1']
     assert_match(
-      /{"state":"done","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\n/,
+      /{"state":"done","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
     )
     assert_equal("No todos found\n", $stdout.string)
@@ -87,9 +90,9 @@ class TestTodo < Test::Unit::TestCase
 
   def test_block
     $stdout = StringIO.new
-    read ['block', '1']
+    @todo.execute ['block', '1']
     assert_match(
-      /{"state":"blocked","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\n/,
+      /{"state":"blocked","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
     )
     assert_equal("   1: \e[33m[!]\e[0m Buy Milk\n", $stdout.string)
@@ -97,9 +100,9 @@ class TestTodo < Test::Unit::TestCase
 
   def test_priority
     $stdout = StringIO.new
-    read ['prio', '1']
+    @todo.execute ['prio', '1']
     assert_match(
-      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","priority":true}\n/,
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","priority":true}\r?\n/,
       File.read(@todo_file)
     )
     assert_equal("   1:\e[31m*\e[0m\e[37m[ ]\e[0m Buy Milk\n", $stdout.string)
@@ -107,9 +110,9 @@ class TestTodo < Test::Unit::TestCase
 
   def test_priority_with_note
     $stdout = StringIO.new
-    read ['prio', '1', 'very important']
+    @todo.execute ['prio', '1', 'very important']
     assert_match(
-      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","priority":true,"note":\["very important"\]}\n/,
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","priority":true,"note":\["very important"\]}\r?\n/,
       File.read(@todo_file)
     )
     assert_equal("   1:\e[31m*\e[0m\e[37m[ ]\e[0m Buy Milk\n", $stdout.string)
@@ -117,31 +120,31 @@ class TestTodo < Test::Unit::TestCase
 
   def test_due_date
     $stdout = StringIO.new
-    read ['due', '1', Time.now.strftime(DATE_FORMAT)]
+    @todo.execute ['due', '1', Time.now.strftime(DATE_FORMAT)]
     assert_match(
-      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","due":"\d{4}-\d{2}-\d{2}"}\n/,
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","due":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
     )
     assert_equal("   1: \e[37m[ ]\e[0m Buy Milk \e[33m(today)\e[0m\n", $stdout.string)
   end
 
   def test_unset_due_date
-    read ['due', '1', Time.now.strftime(DATE_FORMAT)]
+    @todo.execute ['due', '1', Time.now.strftime(DATE_FORMAT)]
     $stdout = StringIO.new
-    read ['due', '1']
+    @todo.execute ['due', '1']
     assert_match(
-      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","due":null}\n/,
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
     )
     assert_equal("   1: \e[37m[ ]\e[0m Buy Milk\n", $stdout.string)
   end
 
   def test_due_date_tag
-    read ['del', '1']
+    @todo.execute ['del', '1']
     $stdout = StringIO.new
-    read ['add', "Buy Milk ASAP due:#{Time.now.strftime(DATE_FORMAT)}"]
+    @todo.execute ['add', "Buy Milk ASAP due:#{Time.now.strftime(DATE_FORMAT)}"]
     assert_match(
-      /{"state":"new","title":"Buy Milk ASAP","modified":"\d{4}-\d{2}-\d{2}","due":"\d{4}-\d{2}-\d{2}"}\n/,
+      /{"state":"new","title":"Buy Milk ASAP","modified":"\d{4}-\d{2}-\d{2}","due":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
     )
     assert_equal("   1: \e[37m[ ]\e[0m Buy Milk ASAP \e[33m(today)\e[0m\n", $stdout.string)
@@ -149,20 +152,20 @@ class TestTodo < Test::Unit::TestCase
 
   def test_due_date_tag_in_rename
     $stdout = StringIO.new
-    read ['rename', '1', "Buy Milk ASAP due:#{Time.now.strftime(DATE_FORMAT)}"]
+    @todo.execute ['rename', '1', "Buy Milk ASAP due:#{Time.now.strftime(DATE_FORMAT)}"]
     assert_match(
-      /{"state":"new","title":"Buy Milk ASAP","modified":"\d{4}-\d{2}-\d{2}","due":"\d{4}-\d{2}-\d{2}"}\n/,
+      /{"state":"new","title":"Buy Milk ASAP","modified":"\d{4}-\d{2}-\d{2}","due":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
     )
     assert_equal("   1: \e[37m[ ]\e[0m Buy Milk ASAP \e[33m(today)\e[0m\n", $stdout.string)
   end
 
   def test_toggle_priority
-    read ['prio', '1']
+    @todo.execute ['prio', '1']
     $stdout = StringIO.new
-    read ['prio', '1']
+    @todo.execute ['prio', '1']
     assert_match(
-      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","priority":false}\n/,
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
     )
     assert_equal("   1: \e[37m[ ]\e[0m Buy Milk\n", $stdout.string)
@@ -170,9 +173,9 @@ class TestTodo < Test::Unit::TestCase
 
   def test_append
     $stdout = StringIO.new
-    read ['append', '1', 'ASAP']
+    @todo.execute ['append', '1', 'ASAP']
     assert_match(
-      /{"state":"new","title":"Buy Milk ASAP","modified":"\d{4}-\d{2}-\d{2}"}\n/,
+      /{"state":"new","title":"Buy Milk ASAP","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
     )
     assert_equal("   1: \e[37m[ ]\e[0m Buy Milk ASAP\n", $stdout.string)
@@ -180,9 +183,9 @@ class TestTodo < Test::Unit::TestCase
 
   def test_rename_todo
     $stdout = StringIO.new
-    read ['rename', '1', 'Buy Bread']
+    @todo.execute ['rename', '1', 'Buy Bread']
     assert_match(
-      /{"state":"new","title":"Buy Bread","modified":"\d{4}-\d{2}-\d{2}"}\n/,
+      /{"state":"new","title":"Buy Bread","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
     )
     assert_equal("   1: \e[37m[ ]\e[0m Buy Bread\n", $stdout.string)
@@ -190,7 +193,7 @@ class TestTodo < Test::Unit::TestCase
 
   def test_delete_todo
     $stdout = StringIO.new
-    read ['del', '1']
+    @todo.execute ['del', '1']
     assert_equal(
       '',
       File.read(@todo_file)
@@ -199,71 +202,71 @@ class TestTodo < Test::Unit::TestCase
   end
 
   def test_add_note
-    read ['note', '1', 'test']
+    @todo.execute ['note', '1', 'test']
     assert_match(
-      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","note":\["test"\]}\n/,
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","note":\["test"\]}\r?\n/,
       File.read(@todo_file)
     )
   end
 
   def test_delete_notes
-    read ['delnote', '1']
+    @todo.execute ['delnote', '1']
     assert_match(
-      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","note":\[\]}\n/,
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
     )
   end
 
   def test_change_state_with_note
-    read ['block', '1', 'note']
+    @todo.execute ['block', '1', 'note']
     assert_match(
-      /{"state":"blocked","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","note":\["note"\]}\n/,
+      /{"state":"blocked","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","note":\["note"\]}\r?\n/,
       File.read(@todo_file)
     )
   end
 
   def test_without_parameters
     $stdout = StringIO.new
-    read []
+    @todo.execute []
     assert_equal("   1: \e[37m[ ]\e[0m Buy Milk\n", $stdout.string)
   end
 
   def test_show_todo
     $stdout = StringIO.new
-    read ['show', '1']
+    @todo.execute ['show', '1']
     assert_match(
-      /\e\[36m {5}state:\e\[0m new\n\e\[36m {5}title:\e\[0m Buy Milk\n\e\[36m  modified:\e\[0m \d{4}-\d{2}-\d{2}\n/,
+      /\e\[36m {5}state:\e\[0m new\n\e\[36m {5}title:\e\[0m Buy Milk\n\e\[36m  modified:\e\[0m \d{4}-\d{2}-\d{2}\r?\n/,
       $stdout.string
     )
   end
 
   def test_list_by_context_tag
-    read ['add', 'Buy Bread @breakfast']
+    @todo.execute ['add', 'Buy Bread @breakfast']
     $stdout = StringIO.new
-    read ['list', '@breakfast']
+    @todo.execute ['list', '@breakfast']
     assert_equal("   2: \e[37m[ ]\e[0m Buy Bread \e[36m@breakfast\e[0m\n", $stdout.string)
   end
 
   def test_list_by_project_tag
-    read ['add', 'Buy Bread +breakfast']
+    @todo.execute ['add', 'Buy Bread +breakfast']
     $stdout = StringIO.new
-    read ['list', '\\+breakfast']
+    @todo.execute ['list', '\\+breakfast']
     assert_equal("   2: \e[37m[ ]\e[0m Buy Bread \e[36m+breakfast\e[0m\n", $stdout.string)
   end
 
   def test_list_by_pre_defined_pattern
-    read ['done', '1']
+    @todo.execute ['done', '1']
     $stdout = StringIO.new
-    read ['list', ':all']
+    @todo.execute ['list', ':all']
     assert_equal("   1: \e[34m[x]\e[0m Buy Milk\n", $stdout.string)
   end
 
   def test_list_by_due_date
     $stdout = StringIO.new
-    read ['due', '1', Time.now.strftime(DATE_FORMAT)]
-    read ['add', 'Buy Bread @unplanned']
+    @todo.execute ['due', '1', Time.now.strftime(DATE_FORMAT)]
+    @todo.execute ['add', 'Buy Bread @unplanned']
     $stdout = StringIO.new
-    read ['list', ':today']
+    @todo.execute ['list', ':today']
     assert_equal("   1: \e[37m[ ]\e[0m Buy Milk \e[33m(today)\e[0m\n", $stdout.string)
   end
 
