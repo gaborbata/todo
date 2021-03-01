@@ -388,5 +388,4 @@ class Todo
 
 end
 
-todo = Todo.new
-todo.execute(ARGV)
+Todo.new.execute(ARGV)
