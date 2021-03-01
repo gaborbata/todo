@@ -4,8 +4,6 @@ require 'stringio'
 
 class TestTodo < Test::Unit::TestCase
 
-  DATE_FORMAT = '%Y-%m-%d'
-
   class << self
     def startup
       Coverage.start if ENV['COVERAGE']
@@ -120,7 +118,7 @@ class TestTodo < Test::Unit::TestCase
 
   def test_due_date
     $stdout = StringIO.new
-    @todo.execute ['due', '1', Time.now.strftime(DATE_FORMAT)]
+    @todo.execute ['due', '1', Time.now.strftime(Todo::DATE_FORMAT)]
     assert_match(
       /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","due":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
@@ -129,7 +127,7 @@ class TestTodo < Test::Unit::TestCase
   end
 
   def test_unset_due_date
-    @todo.execute ['due', '1', Time.now.strftime(DATE_FORMAT)]
+    @todo.execute ['due', '1', Time.now.strftime(Todo::DATE_FORMAT)]
     $stdout = StringIO.new
     @todo.execute ['due', '1']
     assert_match(
@@ -142,7 +140,7 @@ class TestTodo < Test::Unit::TestCase
   def test_due_date_tag
     @todo.execute ['del', '1']
     $stdout = StringIO.new
-    @todo.execute ['add', "Buy Milk ASAP due:#{Time.now.strftime(DATE_FORMAT)}"]
+    @todo.execute ['add', "Buy Milk ASAP due:#{Time.now.strftime(Todo::DATE_FORMAT)}"]
     assert_match(
       /{"state":"new","title":"Buy Milk ASAP","modified":"\d{4}-\d{2}-\d{2}","due":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
@@ -152,7 +150,7 @@ class TestTodo < Test::Unit::TestCase
 
   def test_due_date_tag_in_rename
     $stdout = StringIO.new
-    @todo.execute ['rename', '1', "Buy Milk ASAP due:#{Time.now.strftime(DATE_FORMAT)}"]
+    @todo.execute ['rename', '1', "Buy Milk ASAP due:#{Time.now.strftime(Todo::DATE_FORMAT)}"]
     assert_match(
       /{"state":"new","title":"Buy Milk ASAP","modified":"\d{4}-\d{2}-\d{2}","due":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
@@ -263,7 +261,7 @@ class TestTodo < Test::Unit::TestCase
 
   def test_list_by_due_date
     $stdout = StringIO.new
-    @todo.execute ['due', '1', Time.now.strftime(DATE_FORMAT)]
+    @todo.execute ['due', '1', Time.now.strftime(Todo::DATE_FORMAT)]
     @todo.execute ['add', 'Buy Bread @unplanned']
     $stdout = StringIO.new
     @todo.execute ['list', ':today']

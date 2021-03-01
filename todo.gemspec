@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'todo-jsonl'
-  s.version     = '0.1.18'
+  s.version     = '0.1.19'
   s.date        = '2021-03-01'
   s.summary     = 'todo list manager inspired by todo.txt using the jsonl format'
   s.authors     = ['Gabor Bata']
