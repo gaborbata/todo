@@ -1,4 +1,4 @@
-# todo [![Build Status](https://travis-ci.org/gaborbata/todo.svg?branch=master)](https://travis-ci.org/gaborbata/todo) ![Run tests](https://github.com/gaborbata/todo/workflows/Run%20tests/badge.svg)
+# todo [![Build Status](https://travis-ci.org/gaborbata/todo.svg?branch=master)](https://travis-ci.org/gaborbata/todo) [![Run tests](https://github.com/gaborbata/todo/workflows/Run%20tests/badge.svg)](https://github.com/gaborbata/todo/actions/workflows/ruby.yml)
 
 todo list manager inspired by [todo.txt](http://todotxt.org) using the [jsonl](http://jsonlines.org) format
 
