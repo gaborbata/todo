@@ -165,8 +165,8 @@ class Todo
   end
 
   def setup
-    @today = Time.now
-    next_7_days = (0..6).map do |day| (@today.to_date + day) end
+    @today = Date.today
+    next_7_days = (0..6).map do |day| @today + day end
     @due_date_days = next_7_days.map do |day| day.strftime('%A').downcase end
     due_dates_for_queries = next_7_days.map do |day| day.strftime(DATE_FORMAT) end
 
@@ -316,7 +316,7 @@ class Todo
       priority_flag = task[:priority] ? colorize(PRIORITY_FLAG, :red) : ' '
       due_date = ''
       if task[:due] && state != 'done'
-        date_diff = (Date.parse(task[:due]) - @today.to_date).to_i
+        date_diff = (Date.strptime(task[:due], DATE_FORMAT) - @today).to_i
         if date_diff < 0
           due_date = colorize("(#{date_diff.abs}d overdue)", :red)
         elsif date_diff == 0 || date_diff == 1
@@ -379,9 +379,9 @@ class Todo
       DUE_DATE_DAYS_SIMPLE.index(date.to_s.downcase) ||
       @due_date_days.map do |day| day[0..2] end.index(date.to_s.downcase)
     if day_index
-      due = (@today.to_date + day_index).strftime(DATE_FORMAT)
+      due = (@today + day_index).strftime(DATE_FORMAT)
     else
-      due = date.nil? || date.empty? ? nil : Date.parse(date).strftime(DATE_FORMAT)
+      due = date.nil? || date.empty? ? nil : Date.strptime(date, DATE_FORMAT).strftime(DATE_FORMAT)
     end
     return due
   end
