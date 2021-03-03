@@ -44,6 +44,11 @@ gem install todo-jsonl
 
 ## Demo
 
+Web: [todo JavaScript REPL](http://gaborbata.github.io/todo/) using browser local storage
+(created with [Opal](https://github.com/opal/opal) and [vanilla-terminal](https://github.com/soyjavi/vanilla-terminal))
+
+Screencast:
+
 ![todo](todo.gif)
 
 ## Requirements

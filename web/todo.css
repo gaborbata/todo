@@ -1,0 +1,59 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#vanilla-terminal {
+  width: 100vw;
+  height: 100vh;
+}
+
+.VanillaTerm {
+  color: #bdc3c7;
+  font-family: "Roboto Mono", monospace;
+  font-size: 14px;
+}
+
+.VanillaTerm output span {
+  color: #bdc3c7;
+}
+
+.VanillaTerm span.output {
+  margin-bottom: 1.2em;
+}
+
+.VanillaTerm output span.color {
+  display: inline;
+}
+
+.VanillaTerm output span.color-30 {
+  color: #303234;
+}
+
+.VanillaTerm output span.color-31 {
+  color: #e74c3c;
+}
+
+.VanillaTerm output span.color-32 {
+  color: #27ae60;
+}
+
+.VanillaTerm output span.color-33 {
+  color: #f39c12;
+}
+
+.VanillaTerm output span.color-34 {
+  color: #3498db;
+}
+
+.VanillaTerm output span.color-35 {
+  color: #9b59b6;
+}
+
+.VanillaTerm output span.color-36 {
+  color: #1aacac;
+}
+
+.VanillaTerm output span.color-37 {
+  color: #bdc3c7;
+}

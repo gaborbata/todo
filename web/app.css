@@ -1,0 +1,182 @@
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.VanillaTerm {
+  background-color: #222222;
+  color: white;
+  font-family: "Inconsolata", "Courier New", Courier, monospace;
+  overflow: hidden;
+  padding: 0.75em 1em;
+}
+
+.VanillaTerm .container {
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+}
+
+.VanillaTerm .container ::selection {
+  background-color: #f3e5ab;
+  text-shadow: none !important;
+}
+
+.VanillaTerm output {
+  clear: both;
+  line-height: 1.25em;
+  width: 100%;
+}
+
+.VanillaTerm output pre {
+  margin: 0;
+}
+
+.VanillaTerm output span {
+  display: block;
+  font-weight: normal;
+  color: #dddddd;
+}
+
+.VanillaTerm .prompt,
+.VanillaTerm a {
+  color: #f3e5ab;
+}
+
+.VanillaTerm .prompt {
+  line-height: 1.25em;
+  margin-right: 0.5em;
+}
+
+.VanillaTerm .command {
+  display: flex;
+}
+
+.VanillaTerm .command.input .prompt {
+  color: white;
+  font-weight: normal;
+}
+
+.VanillaTerm .command.idle .input {
+  display: none;
+}
+
+.VanillaTerm .command.hidden .prompt {
+  display: none;
+}
+
+.VanillaTerm .command.hidden .input {
+  max-width: 1px;
+}
+
+.VanillaTerm .command .input {
+  background-color: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  flex: 1;
+  margin: 0;
+  outline: none;
+  padding: 0;
+}
+
+.VanillaTerm .command .spinner:before {
+  display: inline-block;
+  content: '⠋';
+  animation: spin 1s linear infinite;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  0% {
+    content: '⠋'
+  }
+  10% {
+    content: '⠙'
+  }
+  20% {
+    content: '⠹'
+  }
+  30% {
+    content: '⠸'
+  }
+  40% {
+    content: '⠼'
+  }
+  50% {
+    content: '⠴'
+  }
+  60% {
+    content: '⠦'
+  }
+  70% {
+    content: '⠧'
+  }
+  80% {
+    content: '⠇'
+  }
+  90% {
+    content: '⠏'
+  }
+}
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#vanilla-terminal {
+  width: 100vw;
+  height: 100vh;
+}
+
+.VanillaTerm {
+  color: #bdc3c7;
+  font-family: "Roboto Mono", monospace;
+  font-size: 14px;
+}
+
+.VanillaTerm output span {
+  color: #bdc3c7;
+}
+
+.VanillaTerm span.output {
+  margin-bottom: 1.2em;
+}
+
+.VanillaTerm output span.color {
+  display: inline;
+}
+
+.VanillaTerm output span.color-30 {
+  color: #303234;
+}
+
+.VanillaTerm output span.color-31 {
+  color: #e74c3c;
+}
+
+.VanillaTerm output span.color-32 {
+  color: #27ae60;
+}
+
+.VanillaTerm output span.color-33 {
+  color: #f39c12;
+}
+
+.VanillaTerm output span.color-34 {
+  color: #3498db;
+}
+
+.VanillaTerm output span.color-35 {
+  color: #9b59b6;
+}
+
+.VanillaTerm output span.color-36 {
+  color: #1aacac;
+}
+
+.VanillaTerm output span.color-37 {
+  color: #bdc3c7;
+}
