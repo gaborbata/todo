@@ -115,8 +115,10 @@ class Todo
         raise action + ' command requires exactly one parameter' if args.length != 1
         show(args.first.to_i)
       when 'help'
+        raise action + ' command has no parameters' if args.length > 0
         puts usage
       when 'repl'
+        raise action + ' command has no parameters' if args.length > 0
         start_repl
       else
         list(nil, arguments)
