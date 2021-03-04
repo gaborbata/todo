@@ -32,7 +32,7 @@ var term = new VanillaTerminal({
           localStorage.removeItem(#{Todo::TODO_FILE});
           terminal.history = [];
           terminal.historyCursor = 0;
-          terminal.output('todo data wiped.');
+          terminal.output('todo data wiped');
         }
       });
     }
