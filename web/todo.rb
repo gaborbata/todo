@@ -371,7 +371,7 @@ class Todo
     items = filter_tasks(tasks, patterns)
     items.keys.each do |num| tasks.delete(num) end
     write_tasks(tasks)
-    @text_buffer.push "deleted #{items.size} todo(s)"
+    @text_buffer.push "Deleted #{items.size} todo(s)"
   end
 
   def filter_tasks(tasks, patterns)
