@@ -24,8 +24,8 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require './json.rb'
-require './date.rb'
+require 'json'
+require 'date'
 
 class Todo
 
