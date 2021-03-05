@@ -19,7 +19,7 @@ var escapeHtml = function(obj) {
 };
 
 var term = new VanillaTerminal({
-  'welcome': '<u>todo list manager</u> REPL v0.1.21<br>Type "help" for more information.<br><br>',
+  'welcome': '<u>todo list manager</u> REPL v0.1.22<br>Type "help" for more information.<br><br>',
   'defaultCallback': default_callback,
   'prompt': 'todo',
   'commands': {

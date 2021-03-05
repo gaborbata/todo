@@ -118,6 +118,9 @@ class Todo
       when 'help'
         raise action + ' command has no parameters' if args.length > 0
         @text_buffer.push usage.strip
+      when 'cleanup'
+        raise action + ' command requires at least one parameter' if args.nil? || args.empty?
+        cleanup(args)
       else
         list(nil, arguments)
       end
@@ -165,6 +168,7 @@ class Todo
 
       * list <regex> [regex...]        list tasks (only active tasks by default)
       * show <tasknumber>              show all task details
+      * cleanup <regex> [regex...]     cleanup completed tasks by regexp
       * help                           this help screen
 
       With list command the following pre-defined regex patterns can be also used:
@@ -304,18 +308,10 @@ class Todo
   end
 
   def list(tasks = nil, patterns = nil)
-    items = {}
     tasks = tasks || load_tasks
     task_indent = [tasks.keys.max.to_s.size, 4].max
     patterns = patterns.nil? || patterns.empty? ? [@queries[':active']] : patterns
-    tasks.each do |num, task|
-      normalized_task = "state=#{task[:state]} due=#{task[:due]} #{task[:title]}"
-      match = true
-      patterns.each do |pattern|
-        match = false unless /#{@queries[pattern] || pattern}/ix.match(normalized_task)
-      end
-      items[num] = task if match
-    end
+    items = filter_tasks(tasks, patterns)
     items = items.sort_by do |num, task|
       [task[:priority] && task[:state] != 'done' ? 0 : 1, ORDER[task[:state] || 'default'], task[:due] || 'n/a', num]
     end
@@ -367,6 +363,28 @@ class Todo
       val = value.kind_of?(Array) ? "\n" + value.join("\n") : value
       @text_buffer.push "#{colorize(key.to_s.rjust(10, ' ') + ':', :cyan)} #{val}"
     end
+  end
+
+  def cleanup(patterns)
+    tasks = load_tasks
+    patterns = [@queries[':done']] + patterns.to_a
+    items = filter_tasks(tasks, patterns)
+    items.keys.each do |num| tasks.delete(num) end
+    write_tasks(tasks)
+    @text_buffer.push "deleted #{items.size} todo(s)"
+  end
+
+  def filter_tasks(tasks, patterns)
+    items = {}
+    tasks.each do |num, task|
+      normalized_task = "state=#{task[:state]} due=#{task[:due]} #{task[:title]}"
+      match = true
+      patterns.each do |pattern|
+        match = false unless /#{@queries[pattern] || pattern}/ix.match(normalized_task)
+      end
+      items[num] = task if match
+    end
+    return items
   end
 
   def colorize(text, color)

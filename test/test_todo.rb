@@ -268,4 +268,28 @@ class TestTodo < Test::Unit::TestCase
     assert_equal("   1: \e[37m[ ]\e[0m Buy Milk \e[33m(today)\e[0m\n", $stdout.string)
   end
 
+  def test_cleanup_with_non_matching_todos
+    @todo.execute ['rename', '1', 'Buy Bread @breakfast']
+    $stdout = StringIO.new
+    @todo.execute ['cleanup', '@breakfast']
+    assert_match(
+      /{"state":"new","title":"Buy Bread @breakfast","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
+      File.read(@todo_file)
+    )
+    assert_equal("deleted 0 todo(s)\n", $stdout.string)
+  end
+
+  def test_cleanup
+    @todo.execute ['rename', '1', 'Buy Bread @breakfast']
+    @todo.execute ['add', 'Buy Eggs @breakfast']
+    @todo.execute ['done', '1']
+    $stdout = StringIO.new
+    @todo.execute ['cleanup', '@breakfast']
+    assert_match(
+      /{"state":"new","title":"Buy Eggs @breakfast","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
+      File.read(@todo_file)
+    )
+    assert_equal("deleted 1 todo(s)\n", $stdout.string)
+  end
+
 end

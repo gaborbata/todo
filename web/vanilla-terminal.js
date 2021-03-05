@@ -1,4 +1,4 @@
-{
+(function() {
   const KEY = 'VanillaTerm';
   const { addEventListener } = window;
 
@@ -208,4 +208,4 @@
   }
 
   if (window) window.VanillaTerminal = Terminal;
-}
+})();
