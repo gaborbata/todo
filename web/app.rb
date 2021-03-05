@@ -19,12 +19,20 @@ var escapeHtml = function(obj) {
 };
 
 var term = new VanillaTerminal({
-  'welcome': '<u>todo list manager</u> REPL v0.1.22<br>Type "help" for more information.<br><br>',
+  'welcome': '<u>todo list manager</u> REPL v0.1.22<br>Type "help" or "copyright" for more information.<br><br>',
   'defaultCallback': default_callback,
   'prompt': 'todo',
   'commands': {
     'cls': function(terminal) {
       terminal.clear();
+    },
+    'copyright': function(terminal) {
+        var copyright = [
+          'todo-jsonl - Copyright (c) 2020-2021 Gabor Bata',
+          'opal - Copyright (c) 2013-2021 by Adam Beynon and the Opal contributors',
+          'vanilla-terminal - Copyright (c) 2018 Javier Jimenez Villar'
+        ].join('<br>');
+        terminal.output('<span class="output">' + copyright + '</span>');
     },
     'wipe': function(terminal) {
       terminal.prompt('Are you sure remove all your todo data? y/n', function(value) {
