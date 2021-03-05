@@ -276,7 +276,7 @@ class TestTodo < Test::Unit::TestCase
       /{"state":"new","title":"Buy Bread @breakfast","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
     )
-    assert_equal("deleted 0 todo(s)\n", $stdout.string)
+    assert_equal("Deleted 0 todo(s)\n", $stdout.string)
   end
 
   def test_cleanup
@@ -289,7 +289,7 @@ class TestTodo < Test::Unit::TestCase
       /{"state":"new","title":"Buy Eggs @breakfast","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
       File.read(@todo_file)
     )
-    assert_equal("deleted 1 todo(s)\n", $stdout.string)
+    assert_equal("Deleted 1 todo(s)\n", $stdout.string)
   end
 
 end
