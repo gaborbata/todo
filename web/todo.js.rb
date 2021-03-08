@@ -168,7 +168,7 @@ class Todo
 
       * list <regex> [regex...]        list tasks (only active tasks by default)
       * show <tasknumber>              show all task details
-      * cleanup <regex> [regex...]     cleanup completed tasks by regexp
+      * cleanup <regex> [regex...]     cleanup completed tasks by regex
       * help                           this help screen
 
       With list command the following pre-defined regex patterns can be also used:
@@ -214,9 +214,7 @@ class Todo
         tasks[count] = JSON.parse(line.chomp, :symbolize_names => true)
       end
     end
-    if item_to_check && !tasks.has_key?(item_to_check)
-      raise "#{item_to_check}: No such todo"
-    end
+    raise "#{item_to_check}: No such todo" if item_to_check && !tasks.has_key?(item_to_check)
     tasks
   end
 
@@ -248,63 +246,61 @@ class Todo
     list
   end
 
-  def append(item, text = '')
+  def update_task(item, post_action, update_function)
     tasks = load_tasks(item)
-    tasks[item][:title] = [tasks[item][:title], text].join(' ')
+    update_function.call(tasks[item])
     tasks[item][:modified] = @today.strftime(DATE_FORMAT)
-    postprocess_tags(tasks[item])
     write_tasks(tasks)
-    list(tasks)
+    send(post_action, tasks) if post_action
+  end
+
+  def append(item, text = '')
+    update_task item, :list, lambda { |task|
+      task[:title] = [task[:title], text].join(' ')
+      postprocess_tags(task)
+    }
   end
 
   def rename(item, text)
-    tasks = load_tasks(item)
-    tasks[item][:title] = text
-    tasks[item][:modified] = @today.strftime(DATE_FORMAT)
-    postprocess_tags(tasks[item])
-    write_tasks(tasks)
-    list(tasks)
+    update_task item, :list, lambda { |task|
+      task[:title] = text
+      postprocess_tags(task)
+    }
   end
 
   def delete(item)
     tasks = load_tasks(item)
     tasks.delete(item)
     write_tasks(tasks)
-    list
+    list(tasks)
   end
 
   def change_state(item, state, note = nil)
-    tasks = load_tasks(item)
-    tasks[item][:state] = state
-    tasks[item][:modified] = @today.strftime(DATE_FORMAT)
-    if !note.nil? && !note.empty?
-      tasks[item][:note] ||= []
-      tasks[item][:note].push(note)
-    end
-    write_tasks(tasks)
-    list(tasks)
+    update_task item, :list, lambda { |task|
+      task[:state] = state
+      if !note.nil? && !note.empty?
+        task[:note] ||= []
+        task[:note].push(note)
+      end
+    }
   end
 
   def set_priority(item, note = nil)
-    tasks = load_tasks(item)
-    tasks[item][:priority] = !tasks[item][:priority]
-    tasks[item].delete(:priority) if !tasks[item][:priority]
-    tasks[item][:modified] = @today.strftime(DATE_FORMAT)
-    if !note.nil? && !note.empty?
-      tasks[item][:note] ||= []
-      tasks[item][:note].push(note)
-    end
-    write_tasks(tasks)
-    list(tasks)
+    update_task item, :list, lambda { |task|
+      task[:priority] = !task[:priority]
+      task.delete(:priority) if !task[:priority]
+      if !note.nil? && !note.empty?
+        task[:note] ||= []
+        task[:note].push(note)
+      end
+    }
   end
 
   def due_date(item, date = '')
-    tasks = load_tasks(item)
-    tasks[item][:due] = convert_due_date(date)
-    tasks[item].delete(:due) if tasks[item][:due].nil?
-    tasks[item][:modified] = @today.strftime(DATE_FORMAT)
-    write_tasks(tasks)
-    list(tasks)
+    update_task item, :list, lambda { |task|
+      task[:due] = convert_due_date(date)
+      task.delete(:due) if task[:due].nil?
+    }
   end
 
   def list(tasks = nil, patterns = nil)
@@ -341,24 +337,20 @@ class Todo
   end
 
   def add_note(item, text)
-    tasks = load_tasks(item)
-    tasks[item][:note] ||= []
-    tasks[item][:note].push(text)
-    tasks[item][:modified] = @today.strftime(DATE_FORMAT)
-    write_tasks(tasks)
-    show(item)
+    update_task item, :show, lambda { |task|
+      task[:note] ||= []
+      task[:note].push(text)
+    }
   end
 
   def delete_note(item)
-    tasks = load_tasks(item)
-    tasks[item].delete(:note)
-    tasks[item][:modified] = @today.strftime(DATE_FORMAT)
-    write_tasks(tasks)
-    show(item)
+    update_task item, :show, lambda { |task|
+      task.delete(:note)
+    }
   end
 
-  def show(item)
-    tasks = load_tasks(item)
+  def show(item, tasks = nil)
+    tasks = tasks || load_tasks(item)
     tasks[item].each do |key, value|
       val = value.kind_of?(Array) ? "\n" + value.join("\n") : value
       @text_buffer.push "#{colorize(key.to_s.rjust(10, ' ') + ':', :cyan)} #{val}"
@@ -391,7 +383,7 @@ class Todo
     "\e[#{COLOR_CODES[color]}m#{text}\e[0m"
   end
 
-  def convert_due_date(date = '')
+  def convert_due_date(date)
     due = nil
     day_index = @due_date_days.index(date.to_s.downcase) ||
       DUE_DATE_DAYS_SIMPLE.index(date.to_s.downcase) ||
