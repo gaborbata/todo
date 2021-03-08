@@ -240,7 +240,12 @@ class Todo
     update_function.call(tasks[item])
     tasks[item][:modified] = @today.strftime(DATE_FORMAT)
     write_tasks(tasks)
-    send(post_action, tasks) if post_action
+    case post_action
+    when :show
+      show(item, tasks)
+    when :list
+      list(tasks)
+    end
   end
 
   def append(item, text = '')
