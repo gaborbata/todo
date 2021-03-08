@@ -155,7 +155,7 @@ class Todo
       * list <regex> [regex...]        list tasks (only active tasks by default)
       * show <tasknumber>              show all task details
       * repl                           enter read-eval-print loop mode
-      * cleanup <regex> [regex...]     cleanup completed tasks by regexp
+      * cleanup <regex> [regex...]     cleanup completed tasks by regex
       * help                           this help screen
 
       With list command the following pre-defined regex patterns can be also used:
@@ -299,7 +299,7 @@ class Todo
   def list(tasks = nil, patterns = nil)
     tasks = tasks || load_tasks
     task_indent = [tasks.keys.max.to_s.size, 4].max
-    patterns = patterns.nil? || patterns.empty? ? [@queries[':active']] : patterns
+    patterns = patterns.nil? || patterns.empty? ? [':active'] : patterns
     items = filter_tasks(tasks, patterns)
     items = items.sort_by do |num, task|
       [task[:priority] && task[:state] != 'done' ? 0 : 1, ORDER[task[:state] || 'default'], task[:due] || 'n/a', num]
@@ -369,7 +369,7 @@ class Todo
 
   def cleanup(patterns)
     tasks = load_tasks
-    patterns = [@queries[':done']] + patterns.to_a
+    patterns = [':done'] + patterns.to_a
     items = filter_tasks(tasks, patterns)
     items.keys.each do |num| tasks.delete(num) end
     write_tasks(tasks)
@@ -393,7 +393,7 @@ class Todo
     "\e[#{COLOR_CODES[color]}m#{text}\e[0m"
   end
 
-  def convert_due_date(date = '')
+  def convert_due_date(date)
     due = nil
     day_index = @due_date_days.index(date.to_s.downcase) ||
       DUE_DATE_DAYS_SIMPLE.index(date.to_s.downcase) ||

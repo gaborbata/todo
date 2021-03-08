@@ -310,7 +310,7 @@ class Todo
   def list(tasks = nil, patterns = nil)
     tasks = tasks || load_tasks
     task_indent = [tasks.keys.max.to_s.size, 4].max
-    patterns = patterns.nil? || patterns.empty? ? [@queries[':active']] : patterns
+    patterns = patterns.nil? || patterns.empty? ? [':active'] : patterns
     items = filter_tasks(tasks, patterns)
     items = items.sort_by do |num, task|
       [task[:priority] && task[:state] != 'done' ? 0 : 1, ORDER[task[:state] || 'default'], task[:due] || 'n/a', num]
@@ -367,7 +367,7 @@ class Todo
 
   def cleanup(patterns)
     tasks = load_tasks
-    patterns = [@queries[':done']] + patterns.to_a
+    patterns = [':done'] + patterns.to_a
     items = filter_tasks(tasks, patterns)
     items.keys.each do |num| tasks.delete(num) end
     write_tasks(tasks)

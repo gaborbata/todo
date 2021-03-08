@@ -1,4 +1,4 @@
-require './todo.rb'
+require './todo.js.rb'
 
 todo = Todo.new
 
