@@ -23,7 +23,7 @@ Commands:
 * list <regex> [regex...]        list tasks (only active tasks by default)
 * show <tasknumber>              show all task details
 * repl                           enter read-eval-print loop mode
-* cleanup <regex> [regex...]     cleanup completed tasks by regexp
+* cleanup <regex> [regex...]     cleanup completed tasks by regex
 * help                           this help screen
 
 With list command the following pre-defined regex patterns can be also used:
