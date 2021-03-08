@@ -241,25 +241,23 @@ class Todo
     tasks[item][:modified] = @today.strftime(DATE_FORMAT)
     write_tasks(tasks)
     case post_action
-    when :show
-      show(item, tasks)
-    when :list
-      list(tasks)
+    when :show then show(item, tasks)
+    when :list then list(tasks)
     end
   end
 
   def append(item, text = '')
-    update_task item, :list, lambda { |task|
+    update_task(item, :list, lambda do |task|
       task[:title] = [task[:title], text].join(' ')
       postprocess_tags(task)
-    }
+    end)
   end
 
   def rename(item, text)
-    update_task item, :list, lambda { |task|
+    update_task(item, :list, lambda do |task|
       task[:title] = text
       postprocess_tags(task)
-    }
+    end)
   end
 
   def delete(item)
@@ -270,31 +268,31 @@ class Todo
   end
 
   def change_state(item, state, note = nil)
-    update_task item, :list, lambda { |task|
+    update_task(item, :list, lambda do |task|
       task[:state] = state
       if !note.nil? && !note.empty?
         task[:note] ||= []
         task[:note].push(note)
       end
-    }
+    end)
   end
 
   def set_priority(item, note = nil)
-    update_task item, :list, lambda { |task|
+    update_task(item, :list, lambda do |task|
       task[:priority] = !task[:priority]
       task.delete(:priority) if !task[:priority]
       if !note.nil? && !note.empty?
         task[:note] ||= []
         task[:note].push(note)
       end
-    }
+    end)
   end
 
   def due_date(item, date = '')
-    update_task item, :list, lambda { |task|
+    update_task(item, :list, lambda do |task|
       task[:due] = convert_due_date(date)
       task.delete(:due) if task[:due].nil?
-    }
+    end)
   end
 
   def list(tasks = nil, patterns = nil)
@@ -331,16 +329,16 @@ class Todo
   end
 
   def add_note(item, text)
-    update_task item, :show, lambda { |task|
+    update_task(item, :show, lambda do |task|
       task[:note] ||= []
       task[:note].push(text)
-    }
+    end)
   end
 
   def delete_note(item)
-    update_task item, :show, lambda { |task|
+    update_task(item, :show, lambda do |task|
       task.delete(:note)
-    }
+    end)
   end
 
   def show(item, tasks = nil)
