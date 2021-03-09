@@ -264,7 +264,7 @@ class Todo
     tasks = load_tasks(item)
     tasks.delete(item)
     write_tasks(tasks)
-    list(tasks)
+    list
   end
 
   def change_state(item, state, note = nil)

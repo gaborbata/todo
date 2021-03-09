@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# todo.rb - todo list manager inspired by todo.txt using the jsonl format.
+# todo.js.rb - todo list manager inspired by todo.txt using the jsonl format.
 #
 # Copyright (c) 2020-2021 Gabor Bata
 #
@@ -275,7 +275,7 @@ class Todo
     tasks = load_tasks(item)
     tasks.delete(item)
     write_tasks(tasks)
-    list(tasks)
+    list
   end
 
   def change_state(item, state, note = nil)

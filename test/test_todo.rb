@@ -199,6 +199,17 @@ class TestTodo < Test::Unit::TestCase
     assert_equal("No todos found\n", $stdout.string)
   end
 
+  def test_delete_todo_should_reorganize_numbers
+    @todo.execute ['add', 'Buy Rice']
+    $stdout = StringIO.new
+    @todo.execute ['del', '1']
+    assert_match(
+      /{"state":"new","title":"Buy Rice","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
+      File.read(@todo_file)
+    )
+    assert_equal("   1: \e[37m[ ]\e[0m Buy Rice\n", $stdout.string)
+  end
+
   def test_add_note
     @todo.execute ['note', '1', 'test']
     assert_match(
