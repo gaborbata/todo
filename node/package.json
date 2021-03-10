@@ -1,0 +1,13 @@
+{
+  "name": "todo-jsonl",
+  "version": "0.1.29",
+  "description": "todo list manager inspired by todo.txt using the jsonl format",
+  "scripts": {
+    "start": "node todo.js",
+    "build": "npm run compile && npm run optimize && mv todo.min.js todo.js",
+    "compile": "opal --require date --require json --compile todo.js.rb | grep -v \"//# sourceMappingURL\" > todo.js",
+    "optimize": "java -jar closure-compiler.jar --isolation_mode IIFE --warning_level QUIET --js todo.js --js_output_file todo.min.js"
+  },
+  "author": "Gabor Bata",
+  "license": "MIT"
+}
