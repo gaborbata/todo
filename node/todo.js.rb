@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# todo.js.rb - todo list manager inspired by todo.txt using the jsonl format.
+# todo.js.rb for nodejs - todo list manager inspired by todo.txt using the jsonl format.
 #
 # Copyright (c) 2020-2021 Gabor Bata
 #
@@ -69,10 +69,9 @@ class Todo
   DUE_DATE_TAG_PATTERN = /(^| )due:([a-zA-Z0-9-]+)/
   CONTEXT_TAG_PATTERN = /(^| )[@+][\w-]+/
   PRIORITY_FLAG = '*'
-  TODO_FILE = "todo.jsonl"
-  
+  TODO_FILE = `require('path').join(require('os').homedir(), '/todo.jsonl')`
+
   def execute(arguments)
-    @text_buffer = []
     begin
       setup
       action = arguments.first
@@ -117,7 +116,7 @@ class Todo
         show(args.first.to_i)
       when 'help'
         raise action + ' command has no parameters' if args.length > 0
-        @text_buffer.push usage.strip
+        puts usage
       when 'cleanup'
         raise action + ' command requires at least one parameter' if args.nil? || args.empty?
         cleanup(args)
@@ -125,24 +124,9 @@ class Todo
         list(nil, arguments)
       end
     rescue JS::Error, RuntimeError => error
-      @text_buffer.push "#{colorize('ERROR:', :red)} #{error}"
+      puts "#{colorize('ERROR:', :red)} #{error}"
     end
     self
-  end
-
-  def to_s
-    (@text_buffer || []).join("\n") + "\n"
-  end
-
-  def to_html
-    return '<span class="output">' + to_s.
-      gsub('&', '&amp;').
-      gsub('<', '&lt;').
-      gsub('>', '&gt;').
-      gsub(' ', '&nbsp;').
-      gsub("\n", '<br>').
-      gsub(/\e\[0m/, '</span>').
-      gsub(/\e\[(\d+)m/, '<span class="color color-\1">') + '</span>'
   end
 
   private
@@ -179,7 +163,7 @@ class Todo
       Legend:
       #{STATES.select { |k, v| k != 'default' }.map { |k, v| "#{k} #{v}" }.join(', ') }, priority #{PRIORITY_FLAG}
 
-      Local storage: #{TODO_FILE}
+      Todo file: #{TODO_FILE}
     USAGE
   end
 
@@ -205,8 +189,13 @@ class Todo
   def load_tasks(item_to_check = nil)
     count = 0
     tasks = {}
-    
-    todo_jsonl = `window.localStorage.getItem(#{TODO_FILE}) || ''`
+    todo_jsonl = `function() {
+      try {
+        return require('fs').readFileSync(#{TODO_FILE}, 'utf8');
+      } catch (error) {
+        return '';
+      }
+    }.call()`
     if !todo_jsonl.empty?
       todo_jsonl.split("\n").each do |line|
         next if line.strip == ''
@@ -220,7 +209,7 @@ class Todo
 
   def write_tasks(tasks)
     todo_jsonl = tasks.keys.sort.map do |key| JSON.generate(tasks[key]) end.join("\n") + "\n"
-    `window.localStorage.setItem(#{TODO_FILE}, todo_jsonl)`
+    `require('fs').writeFileSync(#{TODO_FILE}, todo_jsonl, {encoding: 'utf8'})`
   end
 
   def postprocess_tags(task)
@@ -240,9 +229,16 @@ class Todo
     }
     postprocess_tags(task)
 
-    todo_jsonl = `window.localStorage.getItem(#{TODO_FILE}) || ''`
-    todo_jsonl += JSON.generate(task) + "\n"
-    `window.localStorage.setItem(#{TODO_FILE}, todo_jsonl)`
+    `
+    let todo_jsonl;
+    try {
+      todo_jsonl = require('fs').readFileSync(#{TODO_FILE}, 'utf8');
+    } catch (error) {
+      todo_jsonl = '';
+    }
+    todo_jsonl += #{JSON.generate(task)} + "\n";
+    require('fs').writeFileSync(#{TODO_FILE}, todo_jsonl, {encoding: 'utf8'});
+    `
     list
   end
 
@@ -334,9 +330,9 @@ class Todo
         end
         due_date = ' ' + due_date
       end
-      @text_buffer.push "#{num.to_s.rjust(task_indent, ' ')}:#{priority_flag}#{display_state} #{title}#{due_date}"
+      puts "#{num.to_s.rjust(task_indent, ' ')}:#{priority_flag}#{display_state} #{title}#{due_date}"
     end
-    @text_buffer.push 'No todos found' if items.empty?
+    puts 'No todos found' if items.empty?
   end
 
   def add_note(item, text)
@@ -356,7 +352,7 @@ class Todo
     tasks = tasks || load_tasks(item)
     tasks[item].each do |key, value|
       val = value.kind_of?(Array) ? "\n" + value.join("\n") : value
-      @text_buffer.push "#{colorize(key.to_s.rjust(10, ' ') + ':', :cyan)} #{val}"
+      puts "#{colorize(key.to_s.rjust(10, ' ') + ':', :cyan)} #{val}"
     end
   end
 
@@ -366,7 +362,7 @@ class Todo
     items = filter_tasks(tasks, patterns)
     items.keys.each do |num| tasks.delete(num) end
     write_tasks(tasks)
-    @text_buffer.push "Deleted #{items.size} todo(s)"
+    puts "Deleted #{items.size} todo(s)"
   end
 
   def filter_tasks(tasks, patterns)
@@ -382,7 +378,7 @@ class Todo
   end
 
   def colorize(text, color)
-    "\e[#{COLOR_CODES[color]}m#{text}\e[0m"
+    `'\u001b[' + #{COLOR_CODES[color]} + 'm' + #{text} + '\u001b[0m'`
   end
 
   def convert_due_date(date)
@@ -399,3 +395,5 @@ class Todo
   end
 
 end
+
+Todo.new.execute(`process.argv.slice(2)`)

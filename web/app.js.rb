@@ -3,21 +3,10 @@ require './todo.js.rb'
 todo = Todo.new
 
 default_callback = lambda do |terminal, command, params|
-  `
-  try {
-    var output = #{todo.execute([command] + params).to_html};
-    terminal.output(output);
-  } catch (error) {
-    terminal.output('<span class="output"><span class="color color-31">ERROR:</span> ' + escapeHtml(error) + '</span>');
-  }
-  `
+  `terminal.output(#{todo.execute([command] + params).to_html})`
 end
 
 `
-var escapeHtml = function(obj) {
-  return (obj || '').toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-};
-
 var term = new VanillaTerminal({
   'welcome': '<u>todo list manager</u> REPL v0.1.29<br>Type "help" or "copyright" for more information.<br><br>',
   'defaultCallback': default_callback,
@@ -47,9 +36,5 @@ var term = new VanillaTerminal({
   }
 });
 
-try {
-  term.output(#{todo.execute(['list']).to_html});
-} catch (error) {
-  term.output('<span class="output"><span class="color color-31">ERROR:</span> ' + escapeHtml(error) + '</span>');
-}
+term.output(#{todo.execute(['list']).to_html});
 `
