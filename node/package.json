@@ -9,5 +9,6 @@
     "optimize": "java -jar closure-compiler.jar --isolation_mode IIFE --warning_level QUIET --js todo.js --js_output_file todo.min.js"
   },
   "author": "Gabor Bata",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": "github:gaborbata/todo"
 }
