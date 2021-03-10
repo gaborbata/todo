@@ -190,15 +190,15 @@ class Todo
     due_dates_for_queries = next_7_days.map do |day| day.strftime(DATE_FORMAT) end
 
     @queries = {
-      ':active'    => 'state=(new|started|blocked)',
-      ':done'      => 'state=done',
-      ':blocked'   => 'state=blocked',
-      ':started'   => 'state=started',
-      ':new'       => 'state=new',
-      ':all'       => 'state=\w+',
-      ':today'     => "due=#{due_dates_for_queries[0]}",
-      ':tomorrow'  => "due=#{due_dates_for_queries[1]}",
-      ':next7days' => "due=(#{due_dates_for_queries.join('|')})"
+      ':active'    => lambda do |task| /(new|started|blocked)/.match(task[:state]) end,
+      ':done'      => lambda do |task| 'done' == task[:state] end,
+      ':blocked'   => lambda do |task| 'blocked' == task[:state] end,
+      ':started'   => lambda do |task| 'started' == task[:state] end,
+      ':new'       => lambda do |task| 'new' == task[:state] end,
+      ':all'       => lambda do |task| /\w+/.match(task[:state]) end,
+      ':today'     => lambda do |task| due_dates_for_queries[0] == task[:due] end,
+      ':tomorrow'  => lambda do |task| due_dates_for_queries[1] == task[:due] end,
+      ':next7days' => lambda do |task| /(#{due_dates_for_queries.join('|')})/.match(task[:due]) end
     }
   end
 
@@ -372,10 +372,9 @@ class Todo
   def filter_tasks(tasks, patterns)
     items = {}
     tasks.each do |num, task|
-      normalized_task = "state=#{task[:state]} due=#{task[:due]} #{task[:title]}"
       match = true
       patterns.each do |pattern|
-        match = false unless /#{@queries[pattern] || pattern}/ix.match(normalized_task)
+        match = false unless @queries[pattern] ? @queries[pattern].call(task) : /#{pattern}/ix.match(task[:title])
       end
       items[num] = task if match
     end
