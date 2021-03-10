@@ -190,9 +190,9 @@ class Todo
     count = 0
     tasks = {}
     todo_jsonl = `function() {
-      try {
+      if (require('fs').existsSync(#{TODO_FILE})) {
         return require('fs').readFileSync(#{TODO_FILE}, 'utf8');
-      } catch (error) {
+      } else {
         return '';
       }
     }.call()`
@@ -231,9 +231,9 @@ class Todo
 
     `
     let todo_jsonl;
-    try {
+    if (require('fs').existsSync(#{TODO_FILE})) {
       todo_jsonl = require('fs').readFileSync(#{TODO_FILE}, 'utf8');
-    } catch (error) {
+    } else {
       todo_jsonl = '';
     }
     todo_jsonl += #{JSON.generate(task)} + "\n";
