@@ -359,7 +359,7 @@ class Todo
         execute(command == 'repl' ? [] : command.split(/\s+/))
       end
       print "\ntodo> "
-      command = STDIN.gets.chomp
+      command = STDIN.gets.chomp.strip
     end
   end
 

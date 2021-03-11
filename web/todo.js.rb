@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# todo.js.rb - todo list manager inspired by todo.txt using the jsonl format.
+# todo.js.rb for web - todo list manager inspired by todo.txt using the jsonl format.
 #
 # Copyright (c) 2020-2021 Gabor Bata
 #
@@ -70,7 +70,7 @@ class Todo
   CONTEXT_TAG_PATTERN = /(^| )[@+][\w-]+/
   PRIORITY_FLAG = '*'
   TODO_FILE = "todo.jsonl"
-  
+
   def execute(arguments)
     @text_buffer = []
     begin
@@ -205,7 +205,7 @@ class Todo
   def load_tasks(item_to_check = nil)
     count = 0
     tasks = {}
-    
+
     todo_jsonl = `window.localStorage.getItem(#{TODO_FILE}) || ''`
     if !todo_jsonl.empty?
       todo_jsonl.split("\n").each do |line|

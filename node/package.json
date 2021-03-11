@@ -1,14 +1,40 @@
 {
   "name": "todo-jsonl",
-  "version": "0.1.29",
+  "version": "0.1.30",
   "description": "todo list manager inspired by todo.txt using the jsonl format",
+  "main": "todo.js",
+  "bin": {
+    "todo": "todo.js"
+  },
   "scripts": {
     "start": "node todo.js",
-    "build": "npm run compile && npm run optimize && mv todo.min.js todo.js",
+    "todo": "node todo.js",
+    "build": "npm run compile && npm run optimize && echo #!/usr/bin/env node > todo.js && cat todo.min.js >> todo.js && rm todo.min.js",
     "compile": "opal --require date --require json --compile todo.js.rb | grep -v \"//# sourceMappingURL\" > todo.js",
-    "optimize": "java -jar closure-compiler.jar --isolation_mode IIFE --warning_level QUIET --js todo.js --js_output_file todo.min.js"
+    "optimize": "java -jar closure-compiler.jar --isolation_mode IIFE --warning_level QUIET --js todo.js --js_output_file todo.min.js",
+    "test": "echo \"no test specified\" && exit 0"
   },
+  "engines": {
+    "node": ">=8.10.0"
+  },
+  "keywords": [
+    "cli",
+    "todo",
+    "command-line",
+    "manager",
+    "todolist",
+    "todotxt",
+    "todoapp",
+    "jsonlines",
+    "jsonl",
+    "ruby",
+    "opal"
+  ],
   "author": "Gabor Bata",
   "license": "MIT",
-  "repository": "github:gaborbata/todo"
+  "homepage": "https://github.com/gaborbata/todo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gaborbata/todo.git"
+  }
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# todo.js.rb for nodejs - todo list manager inspired by todo.txt using the jsonl format.
+# todo.js.rb for Node.js - todo list manager inspired by todo.txt using the jsonl format.
 #
 # Copyright (c) 2020-2021 Gabor Bata
 #
@@ -117,6 +117,9 @@ class Todo
       when 'help'
         raise action + ' command has no parameters' if args.length > 0
         puts usage
+      when 'repl'
+        raise action + ' command has no parameters' if args.length > 0
+        start_repl
       when 'cleanup'
         raise action + ' command requires at least one parameter' if args.nil? || args.empty?
         cleanup(args)
@@ -152,6 +155,7 @@ class Todo
 
       * list <regex> [regex...]        list tasks (only active tasks by default)
       * show <tasknumber>              show all task details
+      * repl                           enter read-eval-print loop mode
       * cleanup <regex> [regex...]     cleanup completed tasks by regex
       * help                           this help screen
 
@@ -190,8 +194,9 @@ class Todo
     count = 0
     tasks = {}
     todo_jsonl = `function() {
-      if (require('fs').existsSync(#{TODO_FILE})) {
-        return require('fs').readFileSync(#{TODO_FILE}, 'utf8');
+      var fs = require('fs');
+      if (fs.existsSync(#{TODO_FILE})) {
+        return fs.readFileSync(#{TODO_FILE}, 'utf8');
       } else {
         return '';
       }
@@ -209,7 +214,7 @@ class Todo
 
   def write_tasks(tasks)
     todo_jsonl = tasks.keys.sort.map do |key| JSON.generate(tasks[key]) end.join("\n") + "\n"
-    `require('fs').writeFileSync(#{TODO_FILE}, todo_jsonl, {encoding: 'utf8'})`
+    `require('fs').writeFileSync(#{TODO_FILE}, todo_jsonl, 'utf8')`
   end
 
   def postprocess_tags(task)
@@ -228,16 +233,16 @@ class Todo
       modified: @today.strftime(DATE_FORMAT)
     }
     postprocess_tags(task)
-
     `
-    let todo_jsonl;
-    if (require('fs').existsSync(#{TODO_FILE})) {
-      todo_jsonl = require('fs').readFileSync(#{TODO_FILE}, 'utf8');
+    var fs = require('fs');
+    var todo_jsonl;
+    if (fs.existsSync(#{TODO_FILE})) {
+      todo_jsonl = fs.readFileSync(#{TODO_FILE}, 'utf8');
     } else {
       todo_jsonl = '';
     }
     todo_jsonl += #{JSON.generate(task)} + "\n";
-    require('fs').writeFileSync(#{TODO_FILE}, todo_jsonl, {encoding: 'utf8'});
+    fs.writeFileSync(#{TODO_FILE}, todo_jsonl, 'utf8');
     `
     list
   end
@@ -354,6 +359,40 @@ class Todo
       val = value.kind_of?(Array) ? "\n" + value.join("\n") : value
       puts "#{colorize(key.to_s.rjust(10, ' ') + ':', :cyan)} #{val}"
     end
+  end
+
+  def start_repl
+    execute_command = lambda do |command|
+      execute(command == 'repl' ? [] : command.split(/\s+/))
+    end
+    `
+    var readline = require('readline').createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+
+    function readCommand() {
+      readline.question("\ntodo> ", function(command) {
+        try {
+          command = command.trim();
+          if (['exit', 'quit'].includes(command)) {
+            readline.close();
+          } else if (['clear', 'cls'].includes(command)) {
+            process.stdout.write('\u001b[H\u001b[2J');
+            readCommand();
+          } else {
+            execute_command(command);
+            readCommand();
+          }
+        } catch(error) {
+          readline.close();
+          throw error;
+        }
+      });
+    }
+    execute_command('');
+    readCommand();
+    `
   end
 
   def cleanup(patterns)

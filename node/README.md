@@ -1,6 +1,9 @@
-# todo [![Build Status](https://travis-ci.org/gaborbata/todo.svg?branch=master)](https://travis-ci.org/gaborbata/todo) [![Run tests](https://github.com/gaborbata/todo/workflows/Run%20tests/badge.svg)](https://github.com/gaborbata/todo/actions/workflows/ruby.yml)
+# todo for Node.js
 
 todo list manager inspired by [todo.txt](http://todotxt.org) using the [jsonl](http://jsonlines.org) format
+
+The Node.js version is compiled with [Opal](https://github.com/opal/opal) from the original [todo](https://github.com/gaborbata/todo) Ruby script,
+with some JavaScript-specific modifications, optimized with [Closure Compiler](https://github.com/google/closure-compiler)
 
 ```
 Usage: todo <command> <arguments>
@@ -40,12 +43,8 @@ new [ ], done [x], started [>], blocked [!], priority *
 ## How to install
 
 ```
-gem install todo-jsonl
+npm install -g todo-jsonl
 ```
-
-## Requirements
-
-Ruby 2.5 or newer, or JRuby
 
 ## Demo
 
@@ -54,10 +53,3 @@ Ruby 2.5 or newer, or JRuby
 Screencast:
 
 ![todo](https://raw.githubusercontent.com/gaborbata/todo/master/todo.gif)
-
-## Other versions
-
-* [todo for Node.js](https://github.com/gaborbata/todo/tree/master/node)
-  compiled with [Opal](https://github.com/opal/opal)
-* [todo for web](http://gaborbata.github.io/todo/) using browser local storage,
-  created with [Opal](https://github.com/opal/opal) and [Vanilla Terminal](https://github.com/soyjavi/vanilla-terminal)
