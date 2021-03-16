@@ -1,6 +1,6 @@
 {
   "name": "todo-jsonl",
-  "version": "0.1.30",
+  "version": "0.1.31",
   "description": "todo list manager inspired by todo.txt using the jsonl format",
   "main": "todo.js",
   "bin": {
@@ -26,9 +26,7 @@
     "todotxt",
     "todoapp",
     "jsonlines",
-    "jsonl",
-    "ruby",
-    "opal"
+    "jsonl"
   ],
   "author": "Gabor Bata",
   "license": "MIT",

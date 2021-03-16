@@ -310,18 +310,16 @@ class Todo
     tasks = tasks || load_tasks
     task_indent = [tasks.keys.max.to_s.size, 4].max
     patterns = patterns.nil? || patterns.empty? ? [':active'] : patterns
-    items = filter_tasks(tasks, patterns)
-    items = items.sort_by do |num, task|
+    items = filter_tasks(tasks, patterns).sort_by do |num, task|
       [task[:priority] && task[:state] != 'done' ? 0 : 1, ORDER[task[:state] || 'default'], task[:due] || 'n/a', num]
     end
     items.each do |num, task|
       state = task[:state] || 'default'
-      color = COLORS[state]
-      display_state = colorize(STATES[state], color)
+      display_state = colorize(STATES[state], COLORS[state])
       title = task[:title].gsub(CONTEXT_TAG_PATTERN) do |tag|
         (tag.start_with?(' ') ? ' ' : '') + colorize(tag.strip, :cyan)
       end
-      priority_flag = task[:priority] ? colorize(PRIORITY_FLAG, :red) : ' '
+      priority_flag = task[:priority] && state != 'done' ? colorize(PRIORITY_FLAG, :red) : ' '
       due_date = ''
       if task[:due] && state != 'done'
         date_diff = (Date.parse(task[:due]) - @today).to_i
@@ -382,7 +380,7 @@ class Todo
   end
 
   def colorize(text, color)
-    "\e[#{COLOR_CODES[color]}m#{text}\e[0m"
+    "\e[#{COLOR_CODES[color] || 37}m#{text}\e[0m"
   end
 
   def convert_due_date(date)
