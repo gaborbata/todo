@@ -1,7 +1,7 @@
 {
   "name": "todo-jsonl",
-  "version": "0.1.31",
-  "description": "todo list manager inspired by todo.txt using the jsonl format",
+  "version": "0.1.32",
+  "description": "todo list manager on the command-line inspired by todo.txt using the jsonl format",
   "main": "todo.js",
   "bin": {
     "todo": "todo.js"

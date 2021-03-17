@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
-# todo.js.rb for Node.js - todo list manager inspired by todo.txt using the jsonl format.
+# todo.js.rb for Node.js - todo list manager on the command-line
+# inspired by todo.txt using the jsonl format.
 #
 # Copyright (c) 2020-2021 Gabor Bata
 #
@@ -69,7 +70,7 @@ class Todo
   DUE_DATE_TAG_PATTERN = /(^| )due:([a-zA-Z0-9-]+)/
   CONTEXT_TAG_PATTERN = /(^| )[@+][\w-]+/
   PRIORITY_FLAG = '*'
-  TODO_FILE = `require('path').join(require('os').homedir(), '/todo.jsonl')`
+  TODO_FILE = `require('path').join(require('os').homedir(), 'todo.jsonl')`
 
   def execute(arguments)
     begin
@@ -241,7 +242,7 @@ class Todo
     end
   end
 
-  def append(item, text = '')
+  def append(item, text)
     update_task(item, :list, lambda do |task|
       task[:title] = [task[:title], text].join(' ')
       postprocess_tags(task)
@@ -291,9 +292,10 @@ class Todo
   end
 
   def list(tasks = nil, patterns = nil)
-    tasks = tasks || load_tasks
+    tasks ||= load_tasks
     task_indent = [tasks.keys.max.to_s.size, 4].max
-    patterns = patterns.nil? || patterns.empty? ? [':active'] : patterns
+    patterns ||= []
+    patterns += [':active'] if (patterns & [':active', ':done', ':blocked', ':started', ':new', ':all']).empty?
     items = filter_tasks(tasks, patterns).sort_by do |num, task|
       [task[:priority] && task[:state] != 'done' ? 0 : 1, ORDER[task[:state] || 'default'], task[:due] || 'n/a', num]
     end
@@ -335,7 +337,7 @@ class Todo
   end
 
   def show(item, tasks = nil)
-    tasks = tasks || load_tasks(item)
+    tasks ||= load_tasks(item)
     tasks[item].each do |key, value|
       val = value.kind_of?(Array) ? "\n" + value.join("\n") : value
       puts "#{colorize(key.to_s.rjust(10, ' ') + ':', :cyan)} #{val}"
@@ -380,7 +382,7 @@ class Todo
     tasks = load_tasks
     patterns = [':done'] + patterns.to_a
     items = filter_tasks(tasks, patterns)
-    items.keys.each do |num| tasks.delete(num) end
+    items.each_key do |num| tasks.delete(num) end
     write_tasks(tasks)
     puts "Deleted #{items.size} todo(s)"
   end
@@ -388,9 +390,8 @@ class Todo
   def filter_tasks(tasks, patterns)
     items = {}
     tasks.each do |num, task|
-      match = true
-      patterns.each do |pattern|
-        match = false unless @queries[pattern] ? @queries[pattern].call(task) : /#{pattern}/ix.match(task[:title])
+      match = patterns.uniq.all? do |pattern|
+        @queries[pattern] ? @queries[pattern].call(task) : /#{pattern}/ix.match(task[:title])
       end
       items[num] = task if match
     end
@@ -409,11 +410,10 @@ class Todo
     if day_index
       due = (@today + day_index).strftime(DATE_FORMAT)
     else
-      due = date.nil? || date.empty? ? nil : Date.parse(date).strftime(DATE_FORMAT)
+      due = date.nil? || date.empty? ? nil : Date.parse(/^\d{4}-\d{2}-\d{2}$/.match(date).to_s).strftime(DATE_FORMAT)
     end
     return due
   end
-
 end
 
 Todo.new.execute(`process.argv.slice(2)`)

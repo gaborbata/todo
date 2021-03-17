@@ -1,6 +1,6 @@
 # todo for Node.js
 
-todo list manager inspired by [todo.txt](http://todotxt.org) using the [jsonl](http://jsonlines.org) format
+todo list manager on the command-line inspired by [todo.txt](http://todotxt.org) using the [jsonl](http://jsonlines.org) format
 
 The Node.js version is compiled with [Opal](https://github.com/opal/opal) from the original [todo](https://github.com/gaborbata/todo) Ruby script,
 with some JavaScript-specific modifications, optimized with [Closure Compiler](https://github.com/google/closure-compiler)

@@ -271,11 +271,26 @@ class TestTodo < Test::Unit::TestCase
     assert_equal("   2: \e[37m[ ]\e[0m Buy Bread \e[36m+breakfast\e[0m\n", $stdout.string)
   end
 
-  def test_list_by_pre_defined_pattern
+  def test_list_all_by_pre_defined_pattern
     @todo.execute ['done', '1']
     $stdout = StringIO.new
     @todo.execute ['list', ':all']
     assert_equal("   1: \e[34m[x]\e[0m Buy Milk\n", $stdout.string)
+  end
+
+  def test_list_active_tasks_by_default
+    @todo.execute ['append', '1', '@breakfast']
+    @todo.execute ['done', '1']
+    @todo.execute ['add', 'Buy Bread @breakfast']
+    $stdout = StringIO.new
+    @todo.execute ['list', '@breakfast']
+    assert_equal("   2: \e[37m[ ]\e[0m Buy Bread \e[36m@breakfast\e[0m\n", $stdout.string)
+  end
+
+  def test_list_non_matching_multiple_regex
+    $stdout = StringIO.new
+    @todo.execute ['list', 'milk', 'bread']
+    assert_equal("No todos found\n", $stdout.string)
   end
 
   def test_list_by_due_date
