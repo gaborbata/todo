@@ -112,9 +112,9 @@
           commands = {}, DOM, history, onInputCallback, defaultCallback, state,
         } = this;
         const commandLine = DOM.input.value.trim();
-        if (keyCode !== 13 || !commandLine) return;
+        if (keyCode !== 13 || (!defaultCallback && !commandLine)) return;
 
-        const [command, ...parameters] = commandLine.trim().split(/[\s|\u00A0]+/);
+        const [command, ...parameters] = commandLine.trim().split(/[\s\u00A0]+/);
 
         if (state.prompt) {
           state.prompt = false;
@@ -125,10 +125,12 @@
         }
 
         // Save command line in history
-        if (history.length >= 100) {
-          history.shift();
+        if (!!commandLine) {
+          if (history.length >= 100) {
+            history.shift();
+          }
+          history.push(commandLine);
         }
-        history.push(commandLine);
         this.historyCursor = history.length;
 
         // Clone command as a new output line
