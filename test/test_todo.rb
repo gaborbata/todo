@@ -148,6 +148,37 @@ class TestTodo < Test::Unit::TestCase
     assert_equal("   1: \e[37m[ ]\e[0m Buy Milk ASAP \e[33m(today)\e[0m\n", $stdout.string)
   end
 
+  def test_due_date_tag_with_day_name
+    @todo.execute ['del', '1']
+    $stdout = StringIO.new
+    @todo.execute ['add', "Buy Milk ASAP due:Friday"]
+    assert_match(
+      /{"state":"new","title":"Buy Milk ASAP","modified":"\d{4}-\d{2}-\d{2}","due":"\d{4}-\d{2}-\d{2}"}\r?\n/,
+      File.read(@todo_file)
+    )
+  end
+
+  def test_due_date_tag_with_short_day_name
+    @todo.execute ['del', '1']
+    $stdout = StringIO.new
+    @todo.execute ['add', "Buy Milk ASAP due:wed"]
+    assert_match(
+      /{"state":"new","title":"Buy Milk ASAP","modified":"\d{4}-\d{2}-\d{2}","due":"\d{4}-\d{2}-\d{2}"}\r?\n/,
+      File.read(@todo_file)
+    )
+  end
+
+  def test_due_date_tag_with_simple_day_name
+    @todo.execute ['del', '1']
+    $stdout = StringIO.new
+    @todo.execute ['add', "Buy Milk ASAP due:tomorrow"]
+    assert_match(
+      /{"state":"new","title":"Buy Milk ASAP","modified":"\d{4}-\d{2}-\d{2}","due":"\d{4}-\d{2}-\d{2}"}\r?\n/,
+      File.read(@todo_file)
+    )
+    assert_equal("   1: \e[37m[ ]\e[0m Buy Milk ASAP \e[33m(tomorrow)\e[0m\n", $stdout.string)
+  end
+
   def test_due_date_tag_in_rename
     $stdout = StringIO.new
     @todo.execute ['rename', '1', "Buy Milk ASAP due:#{Time.now.strftime(Todo::DATE_FORMAT)}"]
@@ -197,6 +228,16 @@ class TestTodo < Test::Unit::TestCase
       File.read(@todo_file)
     )
     assert_equal("No todos found\n", $stdout.string)
+  end
+
+  def test_delete_non_exiting_todo
+    $stdout = StringIO.new
+    @todo.execute ['del', '42']
+    assert_match(
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
+      File.read(@todo_file)
+    )
+    assert_equal("\e[31mERROR:\e[0m 42: No such todo\n", $stdout.string)
   end
 
   def test_delete_todo_should_reorganize_numbers
@@ -300,6 +341,25 @@ class TestTodo < Test::Unit::TestCase
     $stdout = StringIO.new
     @todo.execute ['list', ':today']
     assert_equal("   1: \e[37m[ ]\e[0m Buy Milk \e[33m(today)\e[0m\n", $stdout.string)
+  end
+
+  def test_list_by_next_7_days
+    $stdout = StringIO.new
+    @todo.execute ['due', '1', 'tomorrow']
+    @todo.execute ['add', 'Buy Bread @unplanned']
+    $stdout = StringIO.new
+    @todo.execute ['list', ':next7days']
+    assert_equal("   1: \e[37m[ ]\e[0m Buy Milk \e[33m(tomorrow)\e[0m\n", $stdout.string)
+  end
+
+  def test_invalid_date
+    $stdout = StringIO.new
+    @todo.execute ['due', '1', 'kedd']
+    assert_match(
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
+      File.read(@todo_file)
+    )
+    assert_equal("\e[31mERROR:\e[0m invalid date\n", $stdout.string)
   end
 
   def test_cleanup_with_non_matching_todos

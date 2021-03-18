@@ -173,19 +173,19 @@ class Todo
 
   def setup
     @today = Date.today
-    next_7_days = (0..6).map do |day| @today + day end
-    @due_date_days = next_7_days.map do |day| day.strftime('%A').downcase end
-    due_dates_for_queries = next_7_days.map do |day| day.strftime(DATE_FORMAT) end
+    next_7_days = (0..6).map { |day| @today + day }
+    @due_date_days = next_7_days.map { |day| day.strftime('%A').downcase }
+    due_dates_for_queries = next_7_days.map { |day| day.strftime(DATE_FORMAT) }
     @queries = {
-      ':active'    => lambda do |task| /(new|started|blocked)/.match(task[:state]) end,
-      ':done'      => lambda do |task| 'done' == task[:state] end,
-      ':blocked'   => lambda do |task| 'blocked' == task[:state] end,
-      ':started'   => lambda do |task| 'started' == task[:state] end,
-      ':new'       => lambda do |task| 'new' == task[:state] end,
-      ':all'       => lambda do |task| /\w+/.match(task[:state]) end,
-      ':today'     => lambda do |task| due_dates_for_queries[0] == task[:due] end,
-      ':tomorrow'  => lambda do |task| due_dates_for_queries[1] == task[:due] end,
-      ':next7days' => lambda do |task| /(#{due_dates_for_queries.join('|')})/.match(task[:due]) end
+      ':active'    => lambda { |task| /(new|started|blocked)/.match(task[:state]) },
+      ':done'      => lambda { |task| 'done' == task[:state] },
+      ':blocked'   => lambda { |task| 'blocked' == task[:state] },
+      ':started'   => lambda { |task| 'started' == task[:state] },
+      ':new'       => lambda { |task| 'new' == task[:state] },
+      ':all'       => lambda { |task| /\w+/.match(task[:state]) },
+      ':today'     => lambda { |task| due_dates_for_queries[0] == task[:due] },
+      ':tomorrow'  => lambda { |task| due_dates_for_queries[1] == task[:due] },
+      ':next7days' => lambda { |task| /(#{due_dates_for_queries.join('|')})/.match(task[:due]) }
     }
   end
 
@@ -224,8 +224,8 @@ class Todo
 
   def add(text)
     task = {
-      state: 'new',
-      title: text,
+      state:    'new',
+      title:    text,
       modified: @today.strftime(DATE_FORMAT)
     }
     postprocess_tags(task)
@@ -365,20 +365,18 @@ class Todo
     tasks = load_tasks
     patterns = [':done'] + patterns.to_a
     items = filter_tasks(tasks, patterns)
-    items.each_key do |num| tasks.delete(num) end
+    items.each_key { |num| tasks.delete(num) }
     write_tasks(tasks)
     puts "Deleted #{items.size} todo(s)"
   end
 
   def filter_tasks(tasks, patterns)
-    items = {}
-    tasks.each do |num, task|
-      match = patterns.uniq.all? do |pattern|
+    patterns = patterns.uniq
+    tasks.select do |num, task|
+      patterns.all? do |pattern|
         @queries[pattern] ? @queries[pattern].call(task) : /#{pattern}/ix.match(task[:title])
       end
-      items[num] = task if match
     end
-    items
   end
 
   def colorize(text, color)
@@ -388,7 +386,7 @@ class Todo
   def convert_due_date(date)
     day_index = @due_date_days.index(date.to_s.downcase) ||
       DUE_DATE_DAYS_SIMPLE.index(date.to_s.downcase) ||
-      @due_date_days.map do |day| day[0..2] end.index(date.to_s.downcase)
+      @due_date_days.map { |day| day[0..2] }.index(date.to_s.downcase)
     return (@today + day_index).strftime(DATE_FORMAT) if day_index
     date.nil? || date.empty? ? nil : Date.strptime(date, DATE_FORMAT).strftime(DATE_FORMAT)
   end
