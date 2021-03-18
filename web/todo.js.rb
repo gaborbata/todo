@@ -29,7 +29,6 @@ require 'json'
 require 'date'
 
 class Todo
-
   COLOR_CODES = {
     black:   30,
     red:     31,
@@ -66,11 +65,12 @@ class Todo
   }
 
   DATE_FORMAT = '%Y-%m-%d'
+  DATE_PATTERN = /^[1-9]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/
   DUE_DATE_DAYS_SIMPLE = ['today', 'tomorrow']
   DUE_DATE_TAG_PATTERN = /(^| )due:([a-zA-Z0-9-]+)/
   CONTEXT_TAG_PATTERN = /(^| )[@+][\w-]+/
   PRIORITY_FLAG = '*'
-  TODO_FILE = "todo.jsonl"
+  TODO_FILE = 'todo.jsonl'
 
   def execute(arguments)
     @text_buffer = []
@@ -189,7 +189,6 @@ class Todo
     next_7_days = (0..6).map do |day| @today + day end
     @due_date_days = next_7_days.map do |day| day.strftime('%A').downcase end
     due_dates_for_queries = next_7_days.map do |day| day.strftime(DATE_FORMAT) end
-
     @queries = {
       ':active'    => lambda do |task| /(new|started|blocked)/.match(task[:state]) end,
       ':done'      => lambda do |task| 'done' == task[:state] end,
@@ -206,7 +205,6 @@ class Todo
   def load_tasks(item_to_check = nil)
     count = 0
     tasks = {}
-
     todo_jsonl = `window.localStorage.getItem(#{TODO_FILE}) || ''`
     if !todo_jsonl.empty?
       todo_jsonl.split("\n").each do |line|
@@ -376,7 +374,7 @@ class Todo
       end
       items[num] = task if match
     end
-    return items
+    items
   end
 
   def colorize(text, color)
@@ -384,15 +382,10 @@ class Todo
   end
 
   def convert_due_date(date)
-    due = nil
     day_index = @due_date_days.index(date.to_s.downcase) ||
       DUE_DATE_DAYS_SIMPLE.index(date.to_s.downcase) ||
       @due_date_days.map do |day| day[0..2] end.index(date.to_s.downcase)
-    if day_index
-      due = (@today + day_index).strftime(DATE_FORMAT)
-    else
-      due = date.nil? || date.empty? ? nil : Date.parse(/^\d{4}-\d{2}-\d{2}$/.match(date).to_s).strftime(DATE_FORMAT)
-    end
-    return due
+    return (@today + day_index).strftime(DATE_FORMAT) if day_index
+    date.nil? || date.empty? ? nil : Date.parse(DATE_PATTERN.match(date).to_s).strftime(DATE_FORMAT)
   end
 end

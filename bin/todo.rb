@@ -29,7 +29,6 @@ require 'json'
 require 'date'
 
 class Todo
-
   COLOR_CODES = {
     black:   30,
     red:     31,
@@ -177,7 +176,6 @@ class Todo
     next_7_days = (0..6).map do |day| @today + day end
     @due_date_days = next_7_days.map do |day| day.strftime('%A').downcase end
     due_dates_for_queries = next_7_days.map do |day| day.strftime(DATE_FORMAT) end
-
     @queries = {
       ':active'    => lambda do |task| /(new|started|blocked)/.match(task[:state]) end,
       ':done'      => lambda do |task| 'done' == task[:state] end,
@@ -380,7 +378,7 @@ class Todo
       end
       items[num] = task if match
     end
-    return items
+    items
   end
 
   def colorize(text, color)
@@ -388,16 +386,11 @@ class Todo
   end
 
   def convert_due_date(date)
-    due = nil
     day_index = @due_date_days.index(date.to_s.downcase) ||
       DUE_DATE_DAYS_SIMPLE.index(date.to_s.downcase) ||
       @due_date_days.map do |day| day[0..2] end.index(date.to_s.downcase)
-    if day_index
-      due = (@today + day_index).strftime(DATE_FORMAT)
-    else
-      due = date.nil? || date.empty? ? nil : Date.strptime(date, DATE_FORMAT).strftime(DATE_FORMAT)
-    end
-    return due
+    return (@today + day_index).strftime(DATE_FORMAT) if day_index
+    date.nil? || date.empty? ? nil : Date.strptime(date, DATE_FORMAT).strftime(DATE_FORMAT)
   end
 end
 
