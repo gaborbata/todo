@@ -26,8 +26,9 @@ Commands:
 * cleanup <regex> [regex...]     cleanup completed tasks by regex
 * help                           this help screen
 
-With list command the following pre-defined regex patterns can be also used:
-:active, :done, :blocked, :started, :new, :all, :today, :tomorrow, :next7days
+With list command the following pre-defined queries can be also used:
+:active, :done, :blocked, :started, :new, :all, :priority, :note,
+:today, :tomorrow, :next7days, :overdue, :due
 
 Due dates can be also added via tags in task title: "due:YYYY-MM-DD"
 

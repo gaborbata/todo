@@ -312,7 +312,7 @@ class TestTodo < Test::Unit::TestCase
     assert_equal("   2: \e[37m[ ]\e[0m Buy Bread \e[36m+breakfast\e[0m\n", $stdout.string)
   end
 
-  def test_list_all_by_pre_defined_pattern
+  def test_list_all_by_pre_defined_query
     @todo.execute ['done', '1']
     $stdout = StringIO.new
     @todo.execute ['list', ':all']
@@ -350,6 +350,42 @@ class TestTodo < Test::Unit::TestCase
     $stdout = StringIO.new
     @todo.execute ['list', ':next7days']
     assert_equal("   1: \e[37m[ ]\e[0m Buy Milk \e[33m(tomorrow)\e[0m\n", $stdout.string)
+  end
+
+  def test_list_overdue_tasks
+    $stdout = StringIO.new
+    @todo.execute ['add', "Opean Tutankhamen's burial chamber due:1923-02-16"]
+    $stdout = StringIO.new
+    @todo.execute ['list', ':overdue']
+    assert_match(/   2: \e\[37m\[ \]\e\[0m Opean Tutankhamen's burial chamber \e\[31m\(\d+d overdue\)\e\[0m\n/, $stdout.string)
+  end
+
+  def test_list_tasks_with_due_dates
+    $stdout = StringIO.new
+    @todo.execute ['due', '1', 'tomorrow']
+    @todo.execute ['add', 'Buy Bread @unplanned']
+    $stdout = StringIO.new
+    @todo.execute ['list', ':due']
+    assert_equal("   1: \e[37m[ ]\e[0m Buy Milk \e[33m(tomorrow)\e[0m\n", $stdout.string)
+  end
+
+  def test_list_tasks_with_notes
+    $stdout = StringIO.new
+    @todo.execute ['due', '1', 'tomorrow']
+    @todo.execute ['add', 'Buy Bread']
+    @todo.execute ['note', '2', 'A note']
+    $stdout = StringIO.new
+    @todo.execute ['list', ':note']
+    assert_equal("   2: \e[37m[ ]\e[0m Buy Bread\n", $stdout.string)
+  end
+
+  def test_list_priority_tasks
+    $stdout = StringIO.new
+    @todo.execute ['add', 'Very important task']
+    @todo.execute ['prio', '2']
+    $stdout = StringIO.new
+    @todo.execute ['list', ':priority']
+    assert_equal("   2:\e[31m*\e[0m\e[37m[ ]\e[0m Very important task\n", $stdout.string)
   end
 
   def test_invalid_date

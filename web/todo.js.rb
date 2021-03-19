@@ -172,8 +172,8 @@ class Todo
       * cleanup <regex> [regex...]     cleanup completed tasks by regex
       * help                           this help screen
 
-      With list command the following pre-defined regex patterns can be also used:
-      #{@queries.keys.join(', ')}
+      With list command the following pre-defined queries can be also used:
+      #{@queries.keys.each_with_index.map { |k, i| (i == 8 ? "\n" : '') + k }.join(', ')}
 
       Due dates can be also added via tags in task title: "due:YYYY-MM-DD"
 
@@ -196,9 +196,13 @@ class Todo
       ':started'   => lambda { |task| 'started' == task[:state] },
       ':new'       => lambda { |task| 'new' == task[:state] },
       ':all'       => lambda { |task| /\w+/.match(task[:state]) },
+      ':priority'  => lambda { |task| task[:priority] },
+      ':note'      => lambda { |task| task[:note] && !task[:note].empty? },
       ':today'     => lambda { |task| due_dates_for_queries[0] == task[:due] },
       ':tomorrow'  => lambda { |task| due_dates_for_queries[1] == task[:due] },
-      ':next7days' => lambda { |task| /(#{due_dates_for_queries.join('|')})/.match(task[:due]) }
+      ':next7days' => lambda { |task| /(#{due_dates_for_queries.join('|')})/.match(task[:due]) },
+      ':overdue'   => lambda { |task| task[:due] && task[:due] < due_dates_for_queries[0] },
+      ':due'       => lambda { |task| task[:due] }
     }
   end
 
