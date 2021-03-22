@@ -125,7 +125,7 @@ class Todo
       else
         list(nil, arguments)
       end
-    rescue JS::Error, RuntimeError => error
+    rescue JS::Error, StandardError => error
       @text_buffer.push "#{colorize('ERROR:', :red)} #{error}"
     end
     self
@@ -176,9 +176,10 @@ class Todo
       #{@queries.keys.each_with_index.map { |k, i| (i == 8 ? "\n" : '') + k }.join(', ')}
 
       Due dates can be also added via tags in task title: "due:YYYY-MM-DD"
+      In addition to formatted dates, you can use date synonyms:
+      "due:today", "due:tomorrow", and day names e.g. "due:monday" or "due:tue"
 
-      Legend:
-      #{STATES.select { |k, v| k != 'default' }.map { |k, v| "#{k} #{v}" }.join(', ') }, priority #{PRIORITY_FLAG}
+      Legend: #{STATES.select { |k, v| k != 'default' }.map { |k, v| "#{k} #{v}" }.join(', ') }, priority #{PRIORITY_FLAG}
 
       Local storage: #{TODO_FILE}
     USAGE

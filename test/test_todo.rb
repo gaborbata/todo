@@ -2,8 +2,13 @@ require 'test/unit'
 require 'coverage'
 require 'stringio'
 
-class TestTodo < Test::Unit::TestCase
+class Dir
+  def self.home
+    Dir.pwd
+  end
+end
 
+class TestTodo < Test::Unit::TestCase
   class << self
     def startup
       Coverage.start if ENV['COVERAGE']
@@ -24,10 +29,9 @@ class TestTodo < Test::Unit::TestCase
   def setup
     @original_stdout = $stdout
     $stdout = StringIO.new
-    @todo_file = "#{Dir.pwd}/todo.jsonl"
-    ENV['HOME'] = Dir.pwd
-    File.delete(@todo_file) if File.exist?(@todo_file)
     require_relative '../bin/todo.rb'
+    @todo_file = Todo::TODO_FILE
+    File.delete(@todo_file) if File.exist?(@todo_file)
     @todo = Todo.new
     @todo.execute ['add', 'Buy Milk']
   end
@@ -421,5 +425,4 @@ class TestTodo < Test::Unit::TestCase
     )
     assert_equal("Deleted 1 todo(s)\n", $stdout.string)
   end
-
 end

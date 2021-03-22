@@ -34,9 +34,10 @@ With list command the following pre-defined queries can be also used:
 :today, :tomorrow, :next7days, :overdue, :due
 
 Due dates can be also added via tags in task title: "due:YYYY-MM-DD"
+In addition to formatted dates, you can use date synonyms:
+"due:today", "due:tomorrow", and day names e.g. "due:monday" or "due:tue"
 
-Legend:
-new [ ], done [x], started [>], blocked [!], priority *
+Legend: new [ ], done [x], started [>], blocked [!], priority *
 ```
 
 `todo.jsonl` file stores the todo data which is saved into the `$HOME` folder of the current user.
