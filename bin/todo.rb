@@ -306,7 +306,12 @@ class Todo
     patterns ||= []
     patterns += [':active'] if (patterns & [':active', ':done', ':blocked', ':started', ':new', ':all']).empty?
     items = filter_tasks(tasks, patterns).sort_by do |num, task|
-      [task[:priority] && task[:state] != 'done' ? 0 : 1, ORDER[task[:state] || 'default'], task[:due] || 'n/a', num]
+      [
+        task[:priority] && task[:state] != 'done' ? 0 : 1,
+        ORDER[task[:state] || 'default'],
+        task[:state] != 'done' ? task[:due] || 'n/a' : task[:modified],
+        num
+      ]
     end
     items.each do |num, task|
       state = task[:state] || 'default'
