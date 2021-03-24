@@ -337,10 +337,13 @@ class Todo
 
   def delete_note(item, num = nil)
     update_task(item, :show, lambda do |task|
-      return task.delete(:note) if num.to_s.empty?
-      raise "#{num.to_i}: Note does not exist" if num.to_i <= 0 || task[:note].to_a.size < num.to_i
-      task[:note].delete_at(num.to_i - 1)
-      task.delete(:note) if task[:note].empty?
+      if num.to_s.empty?
+        task.delete(:note)
+      else
+        raise "#{num.to_i}: Note does not exist" if num.to_i <= 0 || task[:note].to_a.size < num.to_i
+        task[:note].delete_at(num.to_i - 1)
+        task.delete(:note) if task[:note].empty?
+      end
     end)
   end
 
