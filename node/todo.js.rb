@@ -108,8 +108,8 @@ class Todo
         raise action + ' command requires at least two parameters' if args.length < 2
         add_note(args.first.to_i, args[1..-1].join(' '))
       when 'delnote'
-        raise action + ' command requires exactly one parameter' if args.length != 1
-        delete_note(args.first.to_i)
+        raise action + ' command requires one or two parameters' if args.length < 1 || args.length > 2
+        delete_note(args.first.to_i, args[1])
       when 'list'
         list(nil, args)
       when 'show'
@@ -152,7 +152,7 @@ class Todo
       * rename <tasknumber> <text>     rename task
       * del <tasknumber>               delete task
       * note <tasknumber> <text>       add note to task
-      * delnote <tasknumber>           delete all notes from task
+      * delnote <tasknumber> [number]  delete a specific or all notes from task
 
       * list <regex> [regex...]        list tasks (only active tasks by default)
       * show <tasknumber>              show all task details
@@ -225,11 +225,7 @@ class Todo
   end
 
   def add(text)
-    task = {
-      state:    'new',
-      title:    text,
-      modified: @today.strftime(DATE_FORMAT)
-    }
+    task = { state: 'new', title: text, modified: @today.strftime(DATE_FORMAT) }
     postprocess_tags(task)
     `require('fs').appendFileSync(#{TODO_FILE}, #{JSON.generate(task) + "\n"}, 'utf8')`
     list
@@ -339,17 +335,21 @@ class Todo
     end)
   end
 
-  def delete_note(item)
+  def delete_note(item, num = nil)
     update_task(item, :show, lambda do |task|
-      task.delete(:note)
+      return task.delete(:note) if num.to_s.empty?
+      raise "#{num.to_i}: Note does not exist" if num.to_i <= 0 || task[:note].to_a.size < num.to_i
+      task[:note].delete_at(num.to_i - 1)
+      task.delete(:note) if task[:note].empty?
     end)
   end
 
   def show(item, tasks = nil)
     tasks ||= load_tasks(item)
-    tasks[item].each do |key, value|
-      val = value.kind_of?(Array) ? "\n" + value.join("\n") : value
-      puts "#{colorize(key.to_s.rjust(10, ' ') + ':', :cyan)} #{val}"
+    tasks[item].each do |k, v|
+      v = "\n" + v.each_with_index.map { |n, i| "#{(i + 1).to_s.rjust(v.size.to_s.size, ' ')}: #{n}" }.
+        join("\n") if v.is_a?(Array)
+      puts "#{colorize(k.to_s.rjust(10, ' ') + ':', :cyan)} #{v}"
     end
   end
 

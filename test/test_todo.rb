@@ -256,18 +256,21 @@ class TestTodo < Test::Unit::TestCase
   end
 
   def test_add_note
+    $stdout = StringIO.new
     @todo.execute ['note', '1', 'test']
     assert_match(
       /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","note":\["test"\]}\r?\n/,
       File.read(@todo_file)
     )
     assert_match(
-      /\e\[36m {5}state:\e\[0m new\n\e\[36m {5}title:\e\[0m Buy Milk\n\e\[36m  modified:\e\[0m \d{4}-\d{2}-\d{2}\n\e\[36m {6}note:\e\[0m \ntest\n/,
+      /\e\[36m {5}state:\e\[0m new\n\e\[36m {5}title:\e\[0m Buy Milk\n\e\[36m  modified:\e\[0m \d{4}-\d{2}-\d{2}\n\e\[36m {6}note:\e\[0m \n1: test\n/,
       $stdout.string
     )
   end
 
   def test_delete_notes
+    @todo.execute ['note', '1', 'a note']
+    $stdout = StringIO.new
     @todo.execute ['delnote', '1']
     assert_match(
       /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
@@ -277,6 +280,41 @@ class TestTodo < Test::Unit::TestCase
       /\e\[36m {5}state:\e\[0m new\n\e\[36m {5}title:\e\[0m Buy Milk\n\e\[36m  modified:\e\[0m \d{4}-\d{2}-\d{2}\n/,
       $stdout.string
     )
+  end
+
+  def test_delete_specific_note
+    @todo.execute ['note', '1', 'first note']
+    @todo.execute ['note', '1', 'second note']
+    $stdout = StringIO.new
+    @todo.execute ['delnote', '1', '2']
+    assert_match(
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}","note":\["first note"\]}\r?\n/,
+      File.read(@todo_file)
+    )
+    assert_match(
+      /\e\[36m {5}state:\e\[0m new\n\e\[36m {5}title:\e\[0m Buy Milk\n\e\[36m  modified:\e\[0m \d{4}-\d{2}-\d{2}\n\e\[36m {6}note:\e\[0m \n1: first note\n/,
+      $stdout.string
+    )
+  end
+
+  def test_delete_last_note
+    @todo.execute ['note', '1', 'first note']
+    $stdout = StringIO.new
+    @todo.execute ['delnote', '1', '1']
+    assert_match(
+      /{"state":"new","title":"Buy Milk","modified":"\d{4}-\d{2}-\d{2}"}\r?\n/,
+      File.read(@todo_file)
+    )
+    assert_match(
+      /\e\[36m {5}state:\e\[0m new\n\e\[36m {5}title:\e\[0m Buy Milk\n\e\[36m  modified:\e\[0m \d{4}-\d{2}-\d{2}\n/,
+      $stdout.string
+    )
+  end
+
+  def test_delete_non_existing_note
+    $stdout = StringIO.new
+    @todo.execute ['delnote', '1', '1']
+    assert_equal("\e[31mERROR:\e[0m 1: Note does not exist\n", $stdout.string)
   end
 
   def test_change_state_with_note
@@ -339,7 +377,6 @@ class TestTodo < Test::Unit::TestCase
   end
 
   def test_list_by_due_date
-    $stdout = StringIO.new
     @todo.execute ['due', '1', Time.now.strftime(Todo::DATE_FORMAT)]
     @todo.execute ['add', 'Buy Bread @unplanned']
     $stdout = StringIO.new
@@ -348,7 +385,6 @@ class TestTodo < Test::Unit::TestCase
   end
 
   def test_list_by_next_7_days
-    $stdout = StringIO.new
     @todo.execute ['due', '1', 'tomorrow']
     @todo.execute ['add', 'Buy Bread @unplanned']
     $stdout = StringIO.new
@@ -357,7 +393,6 @@ class TestTodo < Test::Unit::TestCase
   end
 
   def test_list_overdue_tasks
-    $stdout = StringIO.new
     @todo.execute ['add', "Opean Tutankhamen's burial chamber due:1923-02-16"]
     $stdout = StringIO.new
     @todo.execute ['list', ':overdue']
@@ -365,7 +400,6 @@ class TestTodo < Test::Unit::TestCase
   end
 
   def test_list_tasks_with_due_dates
-    $stdout = StringIO.new
     @todo.execute ['due', '1', 'tomorrow']
     @todo.execute ['add', 'Buy Bread @unplanned']
     $stdout = StringIO.new
@@ -374,7 +408,6 @@ class TestTodo < Test::Unit::TestCase
   end
 
   def test_list_tasks_with_notes
-    $stdout = StringIO.new
     @todo.execute ['due', '1', 'tomorrow']
     @todo.execute ['add', 'Buy Bread']
     @todo.execute ['note', '2', 'A note']
@@ -384,7 +417,6 @@ class TestTodo < Test::Unit::TestCase
   end
 
   def test_list_priority_tasks
-    $stdout = StringIO.new
     @todo.execute ['add', 'Very important task']
     @todo.execute ['prio', '2']
     $stdout = StringIO.new

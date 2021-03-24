@@ -21,7 +21,7 @@ Commands:
 * rename <tasknumber> <text>     rename task
 * del <tasknumber>               delete task
 * note <tasknumber> <text>       add note to task
-* delnote <tasknumber>           delete all notes from task
+* delnote <tasknumber> [number]  delete a specific or all notes from task
 
 * list <regex> [regex...]        list tasks (only active tasks by default)
 * show <tasknumber>              show all task details
