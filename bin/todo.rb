@@ -324,7 +324,7 @@ class Todo
         end
         due_date = ' ' + due_date
       end
-      puts "#{num.to_s.rjust(task_indent, ' ')}:#{priority_flag}#{display_state} #{title}#{due_date}"
+      puts "#{num.to_s.rjust(task_indent)}:#{priority_flag}#{display_state} #{title}#{due_date}"
     end
     puts 'No todos found' if items.empty?
   end
@@ -348,9 +348,10 @@ class Todo
   def show(item, tasks = nil)
     tasks ||= load_tasks(item)
     tasks[item].each do |k, v|
-      v = "\n" + v.each_with_index.map { |n, i| "#{(i + 1).to_s.rjust(v.size.to_s.size, ' ')}: #{n}" }.
+      v = "\n" + v.each_with_index.
+        map { |n, i| v.size > 1 ? "#{(i + 1).to_s.rjust(v.size.to_s.size)}: #{n}" : n }.
         join("\n") if v.is_a?(Array)
-      puts "#{colorize(k.to_s.rjust(10, ' ') + ':', :cyan)} #{v}"
+      puts "#{colorize(k.to_s.rjust(10) + ':', :cyan)} #{v}"
     end
   end
 
