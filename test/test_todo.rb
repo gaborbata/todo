@@ -263,7 +263,7 @@ class TestTodo < Test::Unit::TestCase
       File.read(@todo_file)
     )
     assert_match(
-      /\e\[36m {5}state:\e\[0m new\n\e\[36m {5}title:\e\[0m Buy Milk\n\e\[36m  modified:\e\[0m \d{4}-\d{2}-\d{2}\n\e\[36m {6}note:\e\[0m \n1: test\n/,
+      /\e\[36m {5}state:\e\[0m new\n\e\[36m {5}title:\e\[0m Buy Milk\n\e\[36m  modified:\e\[0m \d{4}-\d{2}-\d{2}\n\e\[36m {6}note:\e\[0m \ntest\n/,
       $stdout.string
     )
   end
@@ -292,7 +292,7 @@ class TestTodo < Test::Unit::TestCase
       File.read(@todo_file)
     )
     assert_match(
-      /\e\[36m {5}state:\e\[0m new\n\e\[36m {5}title:\e\[0m Buy Milk\n\e\[36m  modified:\e\[0m \d{4}-\d{2}-\d{2}\n\e\[36m {6}note:\e\[0m \n1: first note\n/,
+      /\e\[36m {5}state:\e\[0m new\n\e\[36m {5}title:\e\[0m Buy Milk\n\e\[36m  modified:\e\[0m \d{4}-\d{2}-\d{2}\n\e\[36m {6}note:\e\[0m \nfirst note\n/,
       $stdout.string
     )
   end
