@@ -13,7 +13,7 @@
     "compile": "opal --require date --require json --compile todo.js.rb | grep -v \"//# sourceMappingURL\" > todo.js",
     "optimize": "java -jar closure-compiler.jar --isolation_mode IIFE --warning_level QUIET --js todo.js --js_output_file todo.min.js",
     "assemble": "node -e \"console.log('#!/usr/bin/env node')\" > todo.js && cat todo.min.js >> todo.js && rm todo.min.js",
-    "test": "echo \"no test specified\" && exit 0"
+    "test": "mocha --parallel false --timeout 5000"
   },
   "engines": {
     "node": ">=8.10.0"
@@ -36,5 +36,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/gaborbata/todo.git"
+  },
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "mocha": "^8.3.2"
   }
 }
