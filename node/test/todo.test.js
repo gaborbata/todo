@@ -7,7 +7,7 @@ const today = () => new Date().toISOString().replace(/T.+/, '')
 let todoPath
 
 describe("todo list manager", () => {
-  before(() => {
+  before("setup environment", () => {
     const originalHomeDir = os.homedir()
     process.env.HOME = process.cwd()
     process.env.USERPROFILE = process.cwd()
@@ -15,14 +15,14 @@ describe("todo list manager", () => {
     todoPath = path.join(process.cwd(), 'todo.jsonl')
   })
 
-  beforeEach(() => {
+  beforeEach("add initial task", () => {
     if (fs.existsSync(todoPath)) {
       fs.unlinkSync(todoPath)
     }
     execSync('node todo.js add Buy Milk')
   })
 
-  afterEach(() => {
+  afterEach("delete todo file", () => {
     if (fs.existsSync(todoPath)) {
       fs.unlinkSync(todoPath)
     }

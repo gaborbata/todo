@@ -76,37 +76,37 @@ class Todo
     begin
       setup
       action = arguments.first
-      args = arguments[1..-1] || []
+      args = arguments.drop(1)
       case action
       when 'add'
         raise action + ' command requires at least one parameter' if args.nil? || args.empty?
         add(args.join(' '))
       when 'start'
-        args.length > 0 ? change_state(args.first.to_i, 'started', (args[1..-1] || []).join(' ')) : list(nil, [':started'])
+        args.length > 0 ? change_state(args.first.to_i, 'started', args.drop(1).join(' ')) : list(nil, [':started'])
       when 'done'
-        args.length > 0 ? change_state(args.first.to_i, 'done', (args[1..-1] || []).join(' ')) : list(nil, [':done'])
+        args.length > 0 ? change_state(args.first.to_i, 'done', args.drop(1).join(' ')) : list(nil, [':done'])
       when 'block'
-        args.length > 0 ? change_state(args.first.to_i, 'blocked', (args[1..-1] || []).join(' ')) : list(nil, [':blocked'])
+        args.length > 0 ? change_state(args.first.to_i, 'blocked', args.drop(1).join(' ')) : list(nil, [':blocked'])
       when 'reset'
-        args.length > 0 ? change_state(args.first.to_i, 'new', (args[1..-1] || []).join(' ')) : list(nil, [':new'])
+        args.length > 0 ? change_state(args.first.to_i, 'new', args.drop(1).join(' ')) : list(nil, [':new'])
       when 'prio'
         raise action + ' command requires at least one parameter' if args.length < 1
-        set_priority(args.first.to_i, (args[1..-1] || []).join(' '))
+        set_priority(args.first.to_i, args.drop(1).join(' '))
       when 'due'
         raise action + ' command requires at least one parameter' if args.length < 1
-        due_date(args.first.to_i, (args[1..-1] || []).join(' '))
+        due_date(args.first.to_i, args.drop(1).join(' '))
       when 'append'
         raise action + ' command requires at least two parameters' if args.length < 2
-        append(args.first.to_i, args[1..-1].join(' '))
+        append(args.first.to_i, args.drop(1).join(' '))
       when 'rename'
         raise action + ' command requires at least two parameters' if args.length < 2
-        rename(args.first.to_i, args[1..-1].join(' '))
+        rename(args.first.to_i, args.drop(1).join(' '))
       when 'del'
         raise action + ' command requires exactly one parameter' if args.length != 1
         delete(args.first.to_i)
       when 'note'
         raise action + ' command requires at least two parameters' if args.length < 2
-        add_note(args.first.to_i, args[1..-1].join(' '))
+        add_note(args.first.to_i, args.drop(1).join(' '))
       when 'delnote'
         raise action + ' command requires one or two parameters' if args.length < 1 || args.length > 2
         delete_note(args.first.to_i, args[1])
