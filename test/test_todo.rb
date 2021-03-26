@@ -370,6 +370,12 @@ class TestTodo < Test::Unit::TestCase
     assert_equal("   2: \e[37m[ ]\e[0m Buy Bread \e[36m@breakfast\e[0m\n", $stdout.string)
   end
 
+  def test_list_recently_updated_tasks
+    $stdout = StringIO.new
+    @todo.execute ['list', ':recent']
+    assert_equal("   1: \e[37m[ ]\e[0m Buy Milk\n", $stdout.string)
+  end
+
   def test_list_non_matching_multiple_regex
     $stdout = StringIO.new
     @todo.execute ['list', 'milk', 'bread']
@@ -408,7 +414,6 @@ class TestTodo < Test::Unit::TestCase
   end
 
   def test_list_tasks_with_notes
-    @todo.execute ['due', '1', 'tomorrow']
     @todo.execute ['add', 'Buy Bread']
     @todo.execute ['note', '2', 'A note']
     $stdout = StringIO.new

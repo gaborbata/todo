@@ -177,6 +177,7 @@ class Todo
     next_7_days = (0..6).map { |day| @today + day }
     @due_date_days = next_7_days.map { |day| day.strftime('%A').downcase }
     due_dates_for_queries = next_7_days.map { |day| day.strftime(DATE_FORMAT) }
+    recent_date = (@today - 7).strftime(DATE_FORMAT)
     @queries = {
       ':active'    => lambda { |task| /(new|started|blocked)/.match(task[:state]) },
       ':done'      => lambda { |task| 'done' == task[:state] },
@@ -190,7 +191,8 @@ class Todo
       ':tomorrow'  => lambda { |task| due_dates_for_queries[1] == task[:due] },
       ':next7days' => lambda { |task| /(#{due_dates_for_queries.join('|')})/.match(task[:due]) },
       ':overdue'   => lambda { |task| task[:due] && task[:due] < due_dates_for_queries[0] },
-      ':due'       => lambda { |task| task[:due] }
+      ':due'       => lambda { |task| task[:due] },
+      ':recent'    => lambda { |task| recent_date <= task[:modified] }
     }
   end
 

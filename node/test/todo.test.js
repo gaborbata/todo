@@ -3,6 +3,7 @@ const assert = require('chai').assert
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
+const today = () => new Date().toISOString().replace(/T.+/, '')
 let todoPath
 
 describe("todo list manager", () => {
@@ -101,7 +102,7 @@ describe("todo list manager", () => {
   })
 
   it("should set due date", () => {
-    const output = execSync('node todo.js due 1 ' + new Date().toISOString().replace(/T.+/, '')).toString()
+    const output = execSync('node todo.js due 1 ' + today()).toString()
     assert.match(
       fs.readFileSync(todoPath, 'utf8'),
       /{"state":"new", "title":"Buy Milk", "modified":"\d{4}-\d{2}-\d{2}", "due":"\d{4}-\d{2}-\d{2}"}\r?\n/
@@ -110,7 +111,7 @@ describe("todo list manager", () => {
   })
 
   it("should unset due date", () => {
-    execSync('node todo.js due 1 ' + new Date().toISOString().replace(/T.+/, ''))
+    execSync('node todo.js due 1 ' + today())
     const output = execSync('node todo.js due 1').toString()
     assert.match(
       fs.readFileSync(todoPath, 'utf8'),
@@ -121,7 +122,7 @@ describe("todo list manager", () => {
 
   it("should set due date via tag", () => {
     execSync('node todo.js del 1')
-    const output = execSync('node todo.js add "Buy Milk ASAP due:' + new Date().toISOString().replace(/T.+/, '') + '"').toString()
+    const output = execSync('node todo.js add "Buy Milk ASAP due:' + today() + '"').toString()
     assert.match(
       fs.readFileSync(todoPath, 'utf8'),
       /{"state":"new", "title":"Buy Milk ASAP", "modified":"\d{4}-\d{2}-\d{2}", "due":"\d{4}-\d{2}-\d{2}"}\r?\n/
@@ -158,7 +159,7 @@ describe("todo list manager", () => {
   })
 
   it("should set due date via tag in rename", () => {
-    const output = execSync('node todo.js rename 1 "Buy Milk ASAP due:' + new Date().toISOString().replace(/T.+/, '') + '"').toString()
+    const output = execSync('node todo.js rename 1 "Buy Milk ASAP due:' + today() + '"').toString()
     assert.match(
       fs.readFileSync(todoPath, 'utf8'),
       /{"state":"new", "title":"Buy Milk ASAP", "modified":"\d{4}-\d{2}-\d{2}", "due":"\d{4}-\d{2}-\d{2}"}\r?\n/
@@ -326,13 +327,18 @@ describe("todo list manager", () => {
     assert.equal(output, "   2: \u001b[37m[ ]\u001b[0m Buy Bread \u001b[36m@breakfast\u001b[0m\n")
   })
 
+  it("should list recently updated tasks", () => {
+    const output = execSync('node todo.js list :recent').toString()
+    assert.equal(output, "   1: \u001b[37m[ ]\u001b[0m Buy Milk\n")
+  })
+
   it("should not list with non matching multiple regex", () => {
     const output = execSync('node todo.js list milk bread').toString()
     assert.equal(output, "No todos found\n")
   })
 
   it("should list by due date", () => {
-    execSync('node todo.js due 1 ' + new Date().toISOString().replace(/T.+/, ''))
+    execSync('node todo.js due 1 ' + today())
     execSync('node todo.js add "Buy Bread @unplanned"')
     const output = execSync('node todo.js list :today').toString()
     assert.equal(output, "   1: \u001b[37m[ ]\u001b[0m Buy Milk \u001b[33m(today)\u001b[0m\n")
@@ -359,7 +365,6 @@ describe("todo list manager", () => {
   })
 
   it("should list tasks with notes", () => {
-    execSync('node todo.js due 1 tomorrow')
     execSync('node todo.js add "Buy Bread"')
     execSync('node todo.js note 2 "a note"')
     const output = execSync('node todo.js list :note').toString()

@@ -28,7 +28,7 @@ Commands:
 
 With list command the following pre-defined queries can be also used:
 :active, :done, :blocked, :started, :new, :all, :priority, :note,
-:today, :tomorrow, :next7days, :overdue, :due
+:today, :tomorrow, :next7days, :overdue, :due, :recent
 
 Due dates can be also added via tags in task title: "due:YYYY-MM-DD"
 In addition to formatted dates, you can use date synonyms:
