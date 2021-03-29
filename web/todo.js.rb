@@ -80,7 +80,7 @@ class Todo
       args = arguments.drop(1)
       case action
       when 'add'
-        raise action + ' command requires at least one parameter' if args.nil? || args.empty?
+        raise action + ' command requires at least one parameter' if args.empty?
         add(args.join(' '))
       when 'start'
         args.length > 0 ? change_state(args.first.to_i, 'started', args.drop(1).join(' ')) : list(nil, [':started'])
@@ -120,7 +120,7 @@ class Todo
         raise action + ' command has no parameters' if args.length > 0
         @text_buffer.push usage.strip
       when 'cleanup'
-        raise action + ' command requires at least one parameter' if args.nil? || args.empty?
+        raise action + ' command requires at least one parameter' if args.empty?
         cleanup(args)
       else
         list(nil, arguments)
