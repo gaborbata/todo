@@ -1,4 +1,4 @@
-# todo for Node.js
+# todo for Node.js [![npm version](https://badge.fury.io/js/todo-jsonl.svg)](https://badge.fury.io/js/todo-jsonl)
 
 todo list manager on the command-line inspired by [todo.txt](http://todotxt.org) using the [jsonl](http://jsonlines.org) format
 
