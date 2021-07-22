@@ -49,6 +49,9 @@ gem install todo-jsonl
 
 Ruby 2.5 or newer, or JRuby
 
+> Most of the console applications support ANSI/VT100 escape sequences by default,
+> however you might need to enable that in order to have proper colorized output.
+
 ## Demo
 
 [todo JavaScript REPL](http://gaborbata.github.io/todo/) using browser local storage
