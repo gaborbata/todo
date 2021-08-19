@@ -322,7 +322,7 @@ class Todo
     items = filter_tasks(tasks, patterns).sort_by do |num, task|
       [
         task[:priority] && task[:state] != 'done' ? 0 : 1,
-        ORDER[task[:state] || 'default'],
+        ORDER[task[:state] || 'default'] || ORDER['default'],
         task[:state] != 'done' ? task[:due] || 'n/a' : task[:modified],
         num
       ]
