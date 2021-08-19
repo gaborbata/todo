@@ -8,7 +8,7 @@ end
 
 `
 var term = new VanillaTerminal({
-  'welcome': '<u>todo list manager</u> REPL v1.0.7<br>Type "help" or "copyright" for more information.<br><br>',
+  'welcome': '<u>todo list manager</u> REPL v1.0.8<br>Type "help" or "copyright" for more information.<br><br>',
   'defaultCallback': default_callback,
   'prompt': 'todo',
   'commands': {

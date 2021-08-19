@@ -45,14 +45,16 @@ class Todo
     'done'    => '[x]',
     'started' => '[>]',
     'blocked' => '[!]',
+    'waiting' => '[@]',
     'default' => '[?]'
   }
 
   ORDER = {
     'new'     => 3,
-    'done'    => 4,
+    'done'    => 5,
     'started' => 2,
     'blocked' => 1,
+    'waiting' => 4,
     'default' => 100
   }
 
@@ -61,6 +63,7 @@ class Todo
     'done'    => :blue,
     'started' => :green,
     'blocked' => :yellow,
+    'waiting' => :cyan,
     'default' => :magenta
   }
 
@@ -88,6 +91,8 @@ class Todo
         args.length > 0 ? change_state(args.first.to_i, 'done', args.drop(1).join(' ')) : list(nil, [':done'])
       when 'block'
         args.length > 0 ? change_state(args.first.to_i, 'blocked', args.drop(1).join(' ')) : list(nil, [':blocked'])
+      when 'wait'
+        args.length > 0 ? change_state(args.first.to_i, 'waiting', args.drop(1).join(' ')) : list(nil, [':waiting'])
       when 'reset'
         args.length > 0 ? change_state(args.first.to_i, 'new', args.drop(1).join(' ')) : list(nil, [':new'])
       when 'prio'
@@ -157,6 +162,7 @@ class Todo
       * start <tasknumber> [text]      mark task as started, with optional note
       * done <tasknumber> [text]       mark task as completed, with optional note
       * block <tasknumber> [text]      mark task as blocked, with optional note
+      * wait <tasknumber> [text]       mark task as waiting, with optional note
       * reset <tasknumber> [text]      reset task to new state, with optional note
       * prio <tasknumber> [text]       toggle high priority flag, with optional note
       * due <tasknumber> [date]        set/unset due date (in YYYY-MM-DD format)
@@ -192,9 +198,10 @@ class Todo
     due_dates_for_queries = next_7_days.map { |day| day.strftime(DATE_FORMAT) }
     recent_date = (@today - 7).strftime(DATE_FORMAT)
     @queries = {
-      ':active'    => lambda { |task| /(new|started|blocked)/.match(task[:state]) },
+      ':active'    => lambda { |task| /(new|started|blocked|waiting)/.match(task[:state]) },
       ':done'      => lambda { |task| 'done' == task[:state] },
       ':blocked'   => lambda { |task| 'blocked' == task[:state] },
+      ':waiting'   => lambda { |task| 'waiting' == task[:state] },
       ':started'   => lambda { |task| 'started' == task[:state] },
       ':new'       => lambda { |task| 'new' == task[:state] },
       ':all'       => lambda { |task| /\w+/.match(task[:state]) },
@@ -311,7 +318,7 @@ class Todo
     tasks ||= load_tasks
     task_indent = [tasks.keys.max.to_s.size, 4].max
     patterns ||= []
-    patterns += [':active'] if (patterns & [':active', ':done', ':blocked', ':started', ':new', ':all']).empty?
+    patterns += [':active'] if (patterns & [':active', ':done', ':blocked', ':started', ':new', ':all', ':waiting']).empty?
     items = filter_tasks(tasks, patterns).sort_by do |num, task|
       [
         task[:priority] && task[:state] != 'done' ? 0 : 1,
