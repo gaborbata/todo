@@ -10,6 +10,7 @@ Commands:
 * start <tasknumber> [text]      mark task as started, with optional note
 * done <tasknumber> [text]       mark task as completed, with optional note
 * block <tasknumber> [text]      mark task as blocked, with optional note
+* wait <tasknumber> [text]       mark task as waiting, with optional note
 * reset <tasknumber> [text]      reset task to new state, with optional note
 * prio <tasknumber> [text]       toggle high priority flag, with optional note
 * due <tasknumber> [date]        set/unset due date (in YYYY-MM-DD format)
@@ -27,14 +28,14 @@ Commands:
 * help                           this help screen
 
 With list command the following pre-defined queries can be also used:
-:active, :done, :blocked, :started, :new, :all, :priority, :note,
-:today, :tomorrow, :next7days, :overdue, :due, :recent
+:active, :done, :blocked, :waiting, :started, :new, :all, :priority,
+:note, :today, :tomorrow, :next7days, :overdue, :due, :recent
 
 Due dates can be also added via tags in task title: "due:YYYY-MM-DD"
 In addition to formatted dates, you can use date synonyms:
 "due:today", "due:tomorrow", and day names e.g. "due:monday" or "due:tue"
 
-Legend: new [ ], done [x], started [>], blocked [!], priority *
+Legend: new [ ], done [x], started [>], blocked [!], waiting [@], priority *
 ```
 
 `todo.jsonl` file stores the todo data which is saved into the `$HOME` folder of the current user.
