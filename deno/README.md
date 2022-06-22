@@ -1,6 +1,9 @@
-# todo [![Build Status](https://travis-ci.org/gaborbata/todo.svg?branch=master)](https://travis-ci.org/gaborbata/todo) [![Run tests](https://github.com/gaborbata/todo/workflows/Run%20tests/badge.svg)](https://github.com/gaborbata/todo/actions/workflows/ruby.yml) [![Gem Version](https://badge.fury.io/rb/todo-jsonl.svg)](https://badge.fury.io/rb/todo-jsonl) [![npm version](https://badge.fury.io/js/todo-jsonl.svg)](https://badge.fury.io/js/todo-jsonl)
+# todo for Deno
 
 todo list manager on the command-line inspired by [todo.txt](http://todotxt.org) using the [jsonl](http://jsonlines.org) format
+
+This experimental Deno version is compiled with [Opal](https://github.com/opal/opal) from the original [todo](https://github.com/gaborbata/todo) Ruby script,
+with some JavaScript-specific modifications.
 
 ```
 Usage: todo <command> <arguments>
@@ -23,7 +26,6 @@ Commands:
 
 * list <regex> [regex...]        list tasks (only active tasks by default)
 * show <tasknumber>              show all task details
-* repl                           enter read-eval-print loop mode
 * cleanup <regex> [regex...]     cleanup completed tasks by regex
 * help                           this help screen
 
@@ -40,18 +42,11 @@ Legend: new [ ], done [x], started [>], blocked [!], waiting [@], priority *
 
 `todo.jsonl` file stores the todo data which is saved into the `$HOME` folder of the current user.
 
-## How to install
+## How to run
 
 ```
-gem install todo-jsonl
+deno run --allow-env --allow-read --allow-write todo.js
 ```
-
-## Requirements
-
-Ruby 2.5 or newer, or JRuby
-
-> Most of the console applications support ANSI/VT100 escape sequences by default,
-> however you might need to enable that in order to have proper colorized output.
 
 ## Demo
 
@@ -60,12 +55,3 @@ Ruby 2.5 or newer, or JRuby
 Screencast:
 
 ![todo](https://raw.githubusercontent.com/gaborbata/todo/master/todo.gif)
-
-## Other versions
-
-* [todo for Node.js](https://github.com/gaborbata/todo/tree/master/node)
-  compiled with [Opal](https://github.com/opal/opal)
-* [todo for web](http://gaborbata.github.io/todo/) using browser local storage,
-  created with [Opal](https://github.com/opal/opal) and [Vanilla Terminal](https://github.com/soyjavi/vanilla-terminal)
-* [todo for Deno](https://github.com/gaborbata/todo/tree/master/deno) (experimental)
-  compiled with [Opal](https://github.com/opal/opal)
