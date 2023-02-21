@@ -1,3 +1,4 @@
 * linguist-vendored=false
 web/**/* linguist-vendored
 node/**/* linguist-vendored
+deno/**/* linguist-vendored
